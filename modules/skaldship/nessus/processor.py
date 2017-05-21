@@ -23,9 +23,9 @@ import sys
 import os
 import re
 try:
-    from cStringIO import StringIO
+    from io import StringIO
 except ImportError:
-    from StringIO import StringIO
+    from io import StringIO
 from skaldship.hosts import do_host_status
 from skaldship.exploits import connect_exploits
 from skaldship.services import Services
@@ -110,7 +110,7 @@ def process_scanfile(
         try:
             nessus_xml = etree.parse(filename)
             log(" [*] XML file identified")
-        except etree.ParseError, e:
+        except etree.ParseError as e:
             msg = " [!] Invalid Nessus scan file (%s): %s " % (filename, e)
             log(msg, logging.ERROR)
             return msg
@@ -262,7 +262,7 @@ def process_scanfile(
                     f_text=d['f_banner']
                 )
                 db.commit()
-            except Exception, e:
+            except Exception as e:
                 log("Error parsing FTP banner (id 10092): %s" % str(e), logging.ERROR)
 
         #### SSH
@@ -285,7 +285,7 @@ def process_scanfile(
                 )
                 db.commit()
 
-            except Exception, e:
+            except Exception as e:
                 log("Error parsing SSH banner (id 10267): %s" % str(e), logging.ERROR)
 
         if pluginID == '10881':
@@ -299,7 +299,7 @@ def process_scanfile(
                 )
                 db.commit()
 
-            except Exception, e:
+            except Exception as e:
                 log("Error parsing SSH versions (id 10881): %s" % str(e), logging.ERROR)
 
             try:
@@ -311,7 +311,7 @@ def process_scanfile(
                 )
                 db.commit()
 
-            except Exception, e:
+            except Exception as e:
                 log("Error parsing SSH fingerprint (id 10881): %s" % str(e), logging.ERROR)
 
         ### Telnet
@@ -327,7 +327,7 @@ def process_scanfile(
                 else:
                     log("Error finding Telnet banner: (st: %s, end: %s, banner: %s)" %
                         (snip_start, snip_end, plugin_output), logging.ERROR)
-            except Exception, e:
+            except Exception as e:
                 log("Error parsing Telnet banner: %s" % str(e), logging.ERROR)
 
         ### HTTP Server Info
@@ -344,7 +344,7 @@ def process_scanfile(
                     f_text=d['f_banner']
                 )
                 db.commit()
-            except Exception, e:
+            except Exception as e:
                 log("Error parsing HTTP banner (id 10107): %s" % str(e), logging.ERROR)
 
         ### Operating Systems and CPE
@@ -390,13 +390,13 @@ def process_scanfile(
             from MetasploitProAPI import MetasploitProAPI
             msf_api = MetasploitProAPI(host=msf_settings.get('url'), apikey=msf_settings.get('key'))
             working_msf_api = msf_api.login()
-        except Exception, error:
+        except Exception as error:
             log(" [!] Unable to authenticate to MSF API: %s" % str(error), logging.ERROR)
             working_msf_api = False
 
         try:
             scan_data = open(filename, "r+").readlines()
-        except Exception, error:
+        except Exception as error:
             log(" [!] Error loading scan data to send to Metasploit: %s" % str(error), logging.ERROR)
             scan_data = None
 

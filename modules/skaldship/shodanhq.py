@@ -185,7 +185,7 @@ class ShodanData():
 
         log(" [-] %s service: (%s) %s/%s" % (didwhat, ipaddr, f_proto, f_number))
 
-        for k, v in addl_fields.iteritems():
+        for k, v in addl_fields.items():
             # add additional field entries as service_info records
             db.t_service_info.update_or_insert(
                 f_services_id=svc_id,
@@ -246,7 +246,7 @@ def process_report(
 
         try:
             xml = etree.parse(filename)
-        except etree.ParseError, e:
+        except etree.ParseError as e:
             raise Exception(" [!] Invalid XML file (%s): %s " % (filename, e))
             return
 

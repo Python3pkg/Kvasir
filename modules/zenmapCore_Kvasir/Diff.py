@@ -165,9 +165,9 @@ class NdiffCommand(subprocess.Popen):
             # Ndiff because Ndiff is also a Python application. Without removing
             # these, Ndiff will attempt to run using the py2app-bundled Python
             # library, and may run into version or architecture mismatches.
-            if env.has_key("PYTHONPATH"):
+            if "PYTHONPATH" in env:
                 del env["PYTHONPATH"]
-            if env.has_key("PYTHONHOME"):
+            if "PYTHONHOME" in env:
                 del env["PYTHONHOME"]
 
         command_list = [paths_config.ndiff_command_path, "--verbose", "--", filename_a, filename_b]

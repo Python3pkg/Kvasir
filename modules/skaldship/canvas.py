@@ -17,8 +17,8 @@ __version__ = "1.0"
 
 from gluon import current
 import gluon.contrib.simplejson
-import sys, os, time, re, HTMLParser
-from StringIO import StringIO
+import sys, os, time, re, html.parser
+from io import StringIO
 from skaldship.general import html_to_markmin
 from skaldship.hosts import get_host_record, do_host_status
 import logging
@@ -39,8 +39,7 @@ except ImportError:
                 try:
                     from elementtree import ElementTree as etree
                 except ImportError:
-                    raise("Unable to load any XML libraries for ElementTree!"\
-                          "Please install an xml library or Python 2.5 at least")
+                    raise "Unable to load any XML libraries for ElementTree!"
 
 ##----------------------------------------------------------------------------
 
@@ -58,31 +57,31 @@ def process_exploits(filename=None):
         try:
             print("Downloading CANVAS Exploits XML file... Please wait...")
             xmldata = fetch(expurl)
-            print("Download complete. %s bytes received" % (sys.getsizeof(xmldata)))
-        except Exception, e:
+            print(("Download complete. %s bytes received" % (sys.getsizeof(xmldata))))
+        except Exception as e:
             raise Exception("Error downloading CPE XML file: %s" % (e))
 
     logging.info("Processing %s ..." % (filename))
 
     try:
         if filename is None:
-            from StringIO import StringIO
+            from io import StringIO
             exploits = etree.parse(StringIO(xmldata))
         else:
             exploits = etree.parse(filename)
-    except etree.ParseError, e:
-        print("Error processing file: ", e)
+    except etree.ParseError as e:
+        print(("Error processing file: ", e))
         logging.error("Error processing file: %s" % (e))
         return e
-    except IOError, e:
-        print("Error opening file: ", e)
+    except IOError as e:
+        print(("Error opening file: ", e))
         logging.error("Error opening file: %s" % (e))
         return e
 
     r = exploits.getroot()
 
     # CANVAS uses CVE identifiers to link their exploits
-    from exploits import add_exploit, connect_exploits
+    from .exploits import add_exploit, connect_exploits
     counter = 0
     exploits_added = []
     for exploit in r.xpath('//Exploit'):

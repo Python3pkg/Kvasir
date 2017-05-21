@@ -79,7 +79,7 @@ if False and request.tickets_db:
 
 def get_databases(request):
     dbs = {}
-    for (key, value) in global_env.items():
+    for (key, value) in list(global_env.items()):
         cond = False
         try:
             cond = isinstance(value, GQLDB)
@@ -270,7 +270,7 @@ def select():
             else:
                 rows = db(query, ignore_common_filters=True).select(
                     *fields, limitby=(start, stop))
-        except Exception, e:
+        except Exception as e:
             import traceback
             tb = traceback.format_exc()
             (rows, nrows) = ([], 0)
@@ -289,7 +289,7 @@ def select():
             import_csv(db[request.vars.table],
                        request.vars.csvfile.file)
             response.flash = T('data uploaded')
-        except Exception, e:
+        except Exception as e:
             response.flash = DIV(T('unable to parse csv file'), PRE(str(e)))
     # end handle upload csv
 
@@ -448,7 +448,7 @@ def ccache():
         gae_stats['oldest'] = GetInHMS(time.time() - gae_stats['oldest_item_age'])
         total.update(gae_stats)
     else:
-        for key, value in cache.ram.storage.iteritems():
+        for key, value in cache.ram.storage.items():
             if isinstance(value, dict):
                 ram['hits'] = value['hit_total'] - value['misses']
                 ram['misses'] = value['misses']
@@ -472,7 +472,7 @@ def ccache():
         disk_storage = shelve.open(
             os.path.join(folder, 'cache.shelve'))
         try:
-            for key, value in disk_storage.items():
+            for key, value in list(disk_storage.items()):
                 if isinstance(value, dict):
                     disk['hits'] = value['hit_total'] - value['misses']
                     disk['misses'] = value['misses']
@@ -588,7 +588,7 @@ def bg_graph_model():
             meta_graphmodel = dict(group='Undefined', color='#ECECEC')
 
         group = meta_graphmodel['group'].replace(' ', '')
-        if not subgraphs.has_key(group):
+        if group not in subgraphs:
             subgraphs[group] = dict(meta=meta_graphmodel, tables=[])
             subgraphs[group]['tables'].append(tablename)
         else:
@@ -597,7 +597,7 @@ def bg_graph_model():
         graph.add_node(tablename, name=tablename, shape='plaintext',
                        label=table_template(tablename))
 
-    for n, key in enumerate(subgraphs.iterkeys()):
+    for n, key in enumerate(iter(subgraphs.keys())):
         graph.subgraph(nbunch=subgraphs[key]['tables'],
                     name='cluster%d' % n,
                     style='filled',

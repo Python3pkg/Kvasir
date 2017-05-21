@@ -127,12 +127,12 @@ def process_loot_files(loot_list=[]):
 
         try:
             (proto, number) = port.split('/')
-        except AttributeError, e:
+        except AttributeError as e:
             log("Invalid port sent: %s", port, logging.ERROR)
 
         try:
             pw_data = open(filename, "rb").readlines().split('\n')
-        except IOError, e:
+        except IOError as e:
             log("Error opening %s: %s" % (filename, e), logging.ERROR)
 
         accounts = process_password_file(
@@ -212,7 +212,7 @@ def process_report_xml(
 
     try:
         xml = etree.parse(filename)
-    except etree.ParseError, e:
+    except etree.ParseError as e:
         raise Exception(" [!] Invalid XML file (%s): %s " % (filename, e))
 
     root = xml.getroot()

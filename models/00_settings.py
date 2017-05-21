@@ -30,17 +30,17 @@ settings.kvasir_config = {}
 kv_cfg_filename = os.path.join(os.environ.get('HOME'), '.kvasir', 'kvasir.yaml')
 try:
     settings.kvasir_config = yaml.load(open(kv_cfg_filename, 'r'))
-except IOError, e:
+except IOError as e:
     kv_cfg_filename = os.environ.get('KVASIR_CONFIG', 'kvasir.yaml')
     try:
         settings.kvasir_config = yaml.load(open(kv_cfg_filename, 'r'))
-    except IOError, e:
+    except IOError as e:
         kv_cfg_filename = os.path.join('applications', request.application, 'kvasir.yaml')
         try:
             settings.kvasir_config = yaml.load(open(kv_cfg_filename, 'r'))
-        except IOError, e:
+        except IOError as e:
             raise IOError('Unable to load kvasir.yaml configuration. Please place it in $HOME/.kvasir or your application directory')
-except yaml.parser.ParserError, e:
+except yaml.parser.ParserError as e:
     raise yaml.parser.ParserError('Error parsing %s: %s' % (kv_cfg_filename, str(e)))
 
 settings.kv_yaml_file = kv_cfg_filename

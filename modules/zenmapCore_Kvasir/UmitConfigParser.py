@@ -121,7 +121,7 @@
 # ***************************************************************************/
 
 from os.path import exists
-from ConfigParser import ConfigParser, DEFAULTSECT, NoOptionError, NoSectionError
+from configparser import ConfigParser, DEFAULTSECT, NoOptionError, NoSectionError
 from zenmapCore.UmitLogging import log
 
 class UmitConfigParser(ConfigParser):
@@ -152,7 +152,7 @@ class UmitConfigParser(ConfigParser):
     def save_changes(self):
         if self.filenames:
             filename = None
-            if isinstance(self.filenames, basestring):
+            if isinstance(self.filenames, str):
                 filename = self.filenames
             elif isinstance(self.filenames, list):
                 if len(self.filenames) == 1:
@@ -170,19 +170,19 @@ class UmitConfigParser(ConfigParser):
         if self._defaults:
             fp.write("[%s]\n" % DEFAULTSECT)
 
-            items = self._defaults.items()
+            items = list(self._defaults.items())
             items.sort()
 
             for (key, value) in items:
                 fp.write("%s = %s\n" % (key, str(value).replace('\n', '\n\t')))
             fp.write("\n")
 
-        sects = self._sections.keys()
+        sects = list(self._sections.keys())
         sects.sort()
 
         for section in sects:
             fp.write("[%s]\n" % section)
-            for (key, value) in self._sections[section].items():
+            for (key, value) in list(self._sections[section].items()):
                 if key != "__name__":
                     fp.write("%s = %s\n" %
                              (key, str(value).replace('\n', '\n\t')))

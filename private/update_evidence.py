@@ -41,8 +41,8 @@ def md5_file(filename):
             for chunk in iter(lambda: f.read(128*md5.block_size), ''):
                 md5.update(chunk)
             return md5.hexdigest()
-    except Exception, e:
-        print "Error obtaining md5sum of %s: %s" % (filename, e)
+    except Exception as e:
+        print("Error obtaining md5sum of %s: %s" % (filename, e))
 
     return
 
@@ -64,12 +64,12 @@ def update_db(f_type=None, record=None, data=None, filename=None, ipaddr=None):
     if record is None:
         # inserting a new record into the database
         if ipaddr is None:
-            print "ERROR: No IPv4 address provided"
+            print("ERROR: No IPv4 address provided")
             return False
 
         host_id = get_host_record(ipaddr)
         if not host_id:
-            print "ERROR: %s is not a host in the database" % (ipaddr)
+            print("ERROR: %s is not a host in the database" % (ipaddr))
             return False
 
         try:
@@ -79,8 +79,8 @@ def update_db(f_type=None, record=None, data=None, filename=None, ipaddr=None):
                 f_data = data,
                 f_type = f_type
             )
-        except Exception, e:
-            print "ERROR inserting record:", e
+        except Exception as e:
+            print("ERROR inserting record:", e)
             db.commit()
             return False
 
@@ -88,8 +88,8 @@ def update_db(f_type=None, record=None, data=None, filename=None, ipaddr=None):
         # updating an existing record's data
         try:
             db.t_evidence[record].update(f_data = data)
-        except Exception, e:
-            print "ERROR updating record:", e
+        except Exception as e:
+            print("ERROR updating record:", e)
             db.commit()
             return False
 
@@ -110,8 +110,8 @@ def get_ipaddr(filename):
 
 def Run(directory=None, filename=None, f_type=None, ipaddr=None):
 
-    print "======================================================================="
-    print "\nAdding %s files to the Evidence database\n" % (f_type)
+    print("=======================================================================")
+    print("\nAdding %s files to the Evidence database\n" % (f_type))
 
     default_locations = {
         'Session Log': 'session-logs/',
@@ -139,27 +139,27 @@ def Run(directory=None, filename=None, f_type=None, ipaddr=None):
 
             ipaddr = get_ipaddr(filename)
             if ipaddr is None:
-                print "No IP address provided or found in the filename: %s" % (filename)
-                print "For files the IP address must be the first part of the name."
-                print "Example: 192.168.1.0-description.png"
+                print("No IP address provided or found in the filename: %s" % (filename))
+                print("For files the IP address must be the first part of the name.")
+                print("Example: 192.168.1.0-description.png")
                 continue
 
             full_path_filename = os.path.join(file_path, filename)
             md5_filesum = md5_file(full_path_filename)
             try:
                 data = ''.join(open(full_path_filename, 'r').readlines())
-            except Exception, e:
-                print "ERROR opening %s: %s" % (full_path_filename, e)
+            except Exception as e:
+                print("ERROR opening %s: %s" % (full_path_filename, e))
                 continue
 
-            if db_entries.has_key(filename):
+            if filename in db_entries:
                 if db_entries[filename]['md5'] != md5_filesum:
-                    print "%s: md5 sums do not match, updating database..." % (filename)
+                    print("%s: md5 sums do not match, updating database..." % (filename))
                     res = update_db(f_type, db_entries[filename]['id'], data)
                 else:
                     continue
             else:
-                print "%s is NOT in database, adding it..." % (filename)
+                print("%s is NOT in database, adding it..." % (filename))
                 res = update_db(f_type, None, data, filename, ipvaddr)
 
     elif filename is not None:
@@ -168,23 +168,23 @@ def Run(directory=None, filename=None, f_type=None, ipaddr=None):
         if ipaddr is None:
             ipaddr = get_ipaddr(filename)
             if ipaddr is None:
-                print "No IP address provided or found in the filename: %s" % (filename)
-                print "For files the IP address must be the first part of the name."
-                print "Example: 192.168.1.0-description.png"
+                print("No IP address provided or found in the filename: %s" % (filename))
+                print("For files the IP address must be the first part of the name.")
+                print("Example: 192.168.1.0-description.png")
                 return
 
         try:
             data = ''.join(open(os.path.join(dir_path, filename), 'r').readlines())
-        except Exception, e:
-            print "ERROR opening %s: %s" % (filename, e)
+        except Exception as e:
+            print("ERROR opening %s: %s" % (filename, e))
             return
 
         db_row = db(db.t_evidence.f_filename == filename).select(db.t_evidence.f_filename, db.t_evidence.id, db.t_evidence.f_data).first()
         if db_row is None:
-            print "%s is NOT in database, adding it..." % (filename)
+            print("%s is NOT in database, adding it..." % (filename))
             res = update_db(f_type, None, data, filename, ipaddr)
         else:
-            print "%s is in the database, updating database..." % (filename)
+            print("%s is in the database, updating database..." % (filename))
             res = update_db(f_type, db_row.id, data, filename, ipaddr)
 
     return

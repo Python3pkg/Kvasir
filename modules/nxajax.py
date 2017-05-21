@@ -7,22 +7,22 @@ scan template management. At some point this code will poof as it's not used.
 """
 # Oh.. theres an easier way to grab the nexposeCCSessionID: from the HTML response! argh!
 
-import urllib2, urllib, cookielib
+import urllib.request, urllib.error, urllib.parse, urllib.request, urllib.parse, urllib.error, http.cookiejar
 import os, sys, logging
 from lxml import etree
-from StringIO import StringIO
+from io import StringIO
 
 class NexposeAJAXError(RuntimeError):
     pass
 
-class SmartRedirHandler(urllib2.HTTPRedirectHandler):
+class SmartRedirHandler(urllib.request.HTTPRedirectHandler):
     """
     Inserts the nexposeCCSessionID cookie back into headers from an HTTP '303 See Other' response.
     Might be a bug in urllib2.HTTPRedirectHandler
     """
     def http_error_303(self, req, fp, code, msg, hdrs):
         nsession = hdrs.headers
-        result = urllib2.HTTPRedirectHandler.http_error_303(self, req, fp, code, msg, hdrs)
+        result = urllib.request.HTTPRedirectHandler.http_error_303(self, req, fp, code, msg, hdrs)
         result.headers = nsession
         return result
 
@@ -36,12 +36,12 @@ class NXAJAX():
     def __init__(self, session=None):
         self.log = logging.getLogger(self.__class__.__name__)
         if session == None:
-            self.cj = cookielib.LWPCookieJar()
+            self.cj = http.cookiejar.LWPCookieJar()
         else:
-            self.cj = cookielib.LWPCookieJar()
-            for index, value in session.iteritems():
+            self.cj = http.cookiejar.LWPCookieJar()
+            for index, value in session.items():
                 self.cj.set_cookie(value)
-        self.opener = urllib2.build_opener(SmartRedirHandler, urllib2.HTTPCookieProcessor(self.cj), urllib2.HTTPSHandler(debuglevel=1))
+        self.opener = urllib.request.build_opener(SmartRedirHandler, urllib.request.HTTPCookieProcessor(self.cj), urllib.request.HTTPSHandler(debuglevel=1))
         # because we do some cookie-jacking, a numeric host cookie domain will not match the jacked cookie's domain apparently.
         self.host = "localhost"
         self.port = "3780"
@@ -61,12 +61,12 @@ class NXAJAX():
                 'nexposeccpassword':self.password,
                 'login':'Login'
         }
-        login_data = urllib.urlencode(attributes)
-        request = urllib2.Request("https://%s:%s/login.html" %(self.host, self.port), login_data)
+        login_data = urllib.parse.urlencode(attributes)
+        request = urllib.request.Request("https://%s:%s/login.html" %(self.host, self.port), login_data)
         return self.opener.open(request)
 
     def logout(self):
-        request = urllib2.Request("https://%s:%s/logout.html" %(self.host, self.port))
+        request = urllib.request.Request("https://%s:%s/logout.html" %(self.host, self.port))
         return self.opener.open(request)
 
     def send_ajax(self, path="", xmldata=""):
@@ -78,11 +78,11 @@ class NXAJAX():
         """
         if len(xmldata) == 0:
             self.log.debug("Empty POST data. Performing GET for " + path)
-            request = urllib2.Request("https://%s:%s/%s" %(self.host, self.port, path))
+            request = urllib.request.Request("https://%s:%s/%s" %(self.host, self.port, path))
             return self.opener.open(request)
         else:
             self.log.debug("Sending POST to " + path)
-            request = urllib2.Request("https://%s:%s/%s" %(self.host, self.port, path), xmldata, headers={"Content-Type": "text/xml","nexposeCCSessionID":self.cj._cookies['localhost.local']['/']['nexposeCCSessionID'].value})
+            request = urllib.request.Request("https://%s:%s/%s" %(self.host, self.port, path), xmldata, headers={"Content-Type": "text/xml","nexposeCCSessionID":self.cj._cookies['localhost.local']['/']['nexposeCCSessionID'].value})
             return self.opener.open(request)
 
     def getsession(self):
@@ -122,7 +122,7 @@ class ScanTemplates():
                 return etree.tostring(result_xml, pretty_print=True)
             else:
                 for child in tree.iterfind("//tr"):
-                    print child[0].text
+                    print(child[0].text)
 
     def exporttemplate(self, template, najax=None):
         """
@@ -164,7 +164,7 @@ class ScanTemplates():
             self.log.warn("No instance provided")
             return False
         else:
-            post_data = urllib.urlencode({'templateid':template})
+            post_data = urllib.parse.urlencode({'templateid':template})
             response = najax.send_ajax("admin/scan-template-delete.html", post_data)
             return response.read()
 
@@ -215,24 +215,24 @@ if __name__=='__main__':
     if options.listscantemps:
         scantemps = ScanTemplates()
         if options.xmlout:
-            print scantemps.listscantemps(options.xmlout, najax)
+            print(scantemps.listscantemps(options.xmlout, najax))
         else:
             scantemps.listscantemps(options.xmlout, najax)
         sys.exit(0)
 
     if options.Export:
         scantemps = ScanTemplates()
-        print scantemps.exporttemplate(options.Export, najax)
+        print(scantemps.exporttemplate(options.Export, najax))
         sys.exit(0)
 
     if options.Import:
         scantemps = ScanTemplates()
         template = open(options.Import, 'r')
         template = template.read()
-        print scantemps.importtemplate(template, najax)
+        print(scantemps.importtemplate(template, najax))
         sys.exit(0)
 
     if options.Delete:
         scantemps = ScanTemplates()
-        print scantemps.deletetemplate(options.Delete, najax)
+        print(scantemps.deletetemplate(options.Delete, najax))
         sys.exit(0)

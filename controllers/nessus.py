@@ -59,7 +59,7 @@ def import_scan():
     from skaldship.nessus.ness6api import Nessus6API
 
     servers = nessus_config.get('servers', {})
-    for k, v in servers.iteritems():
+    for k, v in servers.items():
         if v.get('version') == 6:
             # nessus >= 6
             try:
@@ -72,7 +72,7 @@ def import_scan():
                     verify=v.get('verify_ssl'),
                     proxies=v.get('proxies')
                 )
-            except Exception, e:
+            except Exception as e:
                 logger.error("Error communicating with %s: %s" % (k, str(e)))
 
             try:
@@ -82,7 +82,7 @@ def import_scan():
                         "%s:%s" % (k, report.get('id')),
                         "%s: %s - %s (%s)" % (k, report.get('name'), ts, report.get('status'))
                     ])
-            except Exception, e:
+            except Exception as e:
                 logger.error("Error making scan list: %s" % (str(e)))
         else:
             # nessus <= 5
@@ -93,7 +93,7 @@ def import_scan():
                 for report in reports:
                     ts = time.ctime(float(report.timestamp))
                     nessusreports.append(["%s:%s" % (k, report.name), "%s: %s - %s (%s)" % (k, report.readablename, ts, report.status)])
-            except Exception, e:
+            except Exception as e:
                 logger.error("Error communicating with %s: %s" % (k, str(e)))
 
     if len(nessusreports) > 1:
@@ -107,7 +107,7 @@ def import_scan():
     # if so pull a list of the workspaces and present them
     if working_msf_api:
         msf_workspaces = ["None"]
-        for w in msf_api.pro_workspaces().keys():
+        for w in list(msf_api.pro_workspaces().keys()):
             msf_workspaces.append(w)
         fields.append(Field('f_msf_workspace', type='string', label=T('MSF Pro Workspace'), requires=IS_EMPTY_OR(IS_IN_SET(msf_workspaces, zero=None))))
 
@@ -129,7 +129,7 @@ def import_scan():
                 # If a nessus report is selected, try to parse it to set report_name
                 try:
                     (server, report_name) = form.vars.f_nessus_report.split(':')
-                except ValueError, e:
+                except ValueError as e:
                     msg = "Invalid report name sent: %s" % (form.vars.f_nessus_report)
                     response.flash = msg
                     logging.error(msg)
@@ -161,7 +161,7 @@ def import_scan():
                     fout = open(filename, "w")
                     fout.write(nessus_report)
                     fout.close()
-                except Exception, e:
+                except Exception as e:
                     msg = ("Error download Nessus report: %s" % (e))
                     logger.error(msg)
                     response.flash = msg
@@ -176,7 +176,7 @@ def import_scan():
                     fout = open(filename, "w")
                     nessus.download_report(report_name, fout)
                     fout.close()
-                except Exception, e:
+                except Exception as e:
                     msg = ("Error download Nessus report: %s" % (e))
                     logger.error(msg)
                     response.flash = msg

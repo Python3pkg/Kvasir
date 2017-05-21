@@ -18,7 +18,7 @@ __version__ = "1.0"
 from gluon import current
 from subprocess import call
 import os
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from skaldship.log import log
 import logging
 
@@ -54,7 +54,7 @@ def grab_screenshot(url=None, outfile=None, phantomjs="/usr/bin/phantomjs"):
             return [False, None]
 
     # encode the url to make sure it passes cleanly to phantomjs
-    url = urllib.quote(url, safe='/:')
+    url = urllib.parse.quote(url, safe='/:')
     folder = current.globalenv['request'].folder
     from sys import platform
     if platform in ["linux", "linux2"]:
@@ -132,10 +132,10 @@ def do_screenshot(services=None):
                 query, f_filename=filename, f_hosts_id=svc_rec.f_hosts_id, f_data=res[1],
                 f_evidence=filename, f_type="Screenshot", f_text="Web Screenshot - %s" % (url))
             db.commit()
-            print(" [-] Web screenshot obtained: %s" % (url))
+            print((" [-] Web screenshot obtained: %s" % (url)))
             good_count += 1
         else:
-            print(" [!] Web screenshot failed: %s" % (url))
+            print((" [!] Web screenshot failed: %s" % (url)))
             invalid_count += 1
 
     return [good_count, invalid_count]
@@ -155,24 +155,24 @@ if __name__ == "__main__":
     result = grab_screenshot(url, outfile)
     imgresult = result[1]
 
-    print "Result = %s" % result[0]
+    print("Result = %s" % result[0])
 
     try:
         f = file(outfile)
         imgdata = f.read()
         f.close()
-    except Exception, e:
+    except Exception as e:
         sys.exit("Error processing outfile: %s" % (e))
 
     m1 = md5()
     m1.update(imgresult)
-    print "imgresult md5 = %s" % m1.hexdigest()
+    print("imgresult md5 = %s" % m1.hexdigest())
 
     m2 = md5()
     m2.update(imgdata)
-    print "  imgdata md5 = %s" % m2.hexdigest()
+    print("  imgdata md5 = %s" % m2.hexdigest())
 
     if m1.digest() == m2.digest():
-        print "Images matched. Everything worked!"
+        print("Images matched. Everything worked!")
     else:
-        print "Images don't match. Something borked."
+        print("Images don't match. Something borked.")

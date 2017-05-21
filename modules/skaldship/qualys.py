@@ -33,13 +33,13 @@ def process_xml(
     update_hosts=False,
     ):
     # Upload and process Qualys XML Scan file
-    import os, time, re, HTMLParser
-    from StringIO import StringIO
+    import os, time, re, html.parser
+    from io import StringIO
     from MetasploitProAPI import MetasploitProAPI
     from skaldship.hosts import html_to_markmin, get_host_record, do_host_status
     from skaldship.cpe import lookup_cpe
 
-    parser = HTMLParser.HTMLParser()
+    parser = html.parser.HTMLParser()
 
     # output regexes
     RE_NETBIOS_NAME = re.compile('NetBIOS name: (?P<d>.*),')
@@ -78,12 +78,12 @@ def process_xml(
         ip_only = ip_include_list.split('\r\n')
         # TODO: check for ip subnet/range and break it out to individuals
 
-    print(" [*] Processing Qualys scan file %s" % (filename))
+    print((" [*] Processing Qualys scan file %s" % (filename)))
 
     try:
         nmap_xml = etree.parse(filename)
-    except etree.ParseError, e:
-        print(" [!] Invalid XML file (%s): %s " % (filename, e))
+    except etree.ParseError as e:
+        print((" [!] Invalid XML file (%s): %s " % (filename, e)))
         return
 
     root = nmap_xml.getroot()
@@ -104,7 +104,7 @@ def process_xml(
 
     # parse the hosts, where all the goodies are
     nodes = root.findall('IP')
-    print(" [-] Parsing %d hosts" % (len(nodes)))
+    print((" [-] Parsing %d hosts" % (len(nodes))))
     hoststats = {}
     hoststats['added'] = 0
     hoststats['skipped'] = 0
@@ -153,7 +153,7 @@ def process_xml(
         nodefields['f_confirmed'] = False
 
         # check to see if IPv4/IPv6 exists in DB already
-        if nodefields.has_key('f_ipaddr'):
+        if 'f_ipaddr' in nodefields:
             host_rec = db(db.t_hosts.f_ipaddr == nodefields['f_ipaddr']).select().first()
         else:
             logging.warn("No IP Address found in record. Skipping")
@@ -163,7 +163,7 @@ def process_xml(
             host_id = db.t_hosts.insert(**nodefields)
             db.commit()
             hoststats['added'] += 1
-            print(" [-] Adding %s" % (ipaddr))
+            print((" [-] Adding %s" % (ipaddr)))
         elif host_rec is not None and update_hosts:
             db.commit()
             host_id = db(db.t_hosts.f_ipaddr == nodefields['f_ipaddr']).update(**nodefields)
@@ -171,11 +171,11 @@ def process_xml(
             host_id = get_host_record(ipaddr)
             host_id = host_id.id
             hoststats['updated'] += 1
-            print(" [-] Updating %s" % (ipaddr))
+            print((" [-] Updating %s" % (ipaddr)))
         else:
             hoststats['skipped'] += 1
             db.commit()
-            print(" [-] Skipped %s" % (ipaddr))
+            print((" [-] Skipped %s" % (ipaddr)))
             continue
         hosts.append(host_id)
 
@@ -205,7 +205,7 @@ def process_xml(
                 f_product = None
                 svc_fp = None
 
-            print(" [-] Adding port: %s/%s (%s)" % (f_proto, f_number, f_name))
+            print((" [-] Adding port: %s/%s (%s)" % (f_proto, f_number, f_name)))
             svc_id = db.t_services.update_or_insert(f_proto=f_proto, f_number=f_number, f_status=f_status, f_hosts_id=host_id, f_name=f_name)
 
             if f_product:
@@ -231,7 +231,7 @@ def process_xml(
                 if cpe_id[0] == "a":
                     # process CPE Applications
 
-                    print(" [-] Found Application CPE data: %s" % (cpe_id))
+                    print((" [-] Found Application CPE data: %s" % (cpe_id)))
                     svc_info = db.t_service_info.update_or_insert(f_services_id=svc_id, f_name='CPE ID', f_text="cpe:/%s" % (cpe_id))
                     db.commit()
 
@@ -293,8 +293,8 @@ def process_xml(
                     'tag': asset_group,
                     },
             )
-            print(" [*] Added file to MSF Pro: %s" % (res))
-        except MSFAPIError, e:
+            print((" [*] Added file to MSF Pro: %s" % (res)))
+        except MSFAPIError as e:
             logging.error("MSFAPI Error: %s" % (e))
             pass
 
@@ -302,7 +302,7 @@ def process_xml(
     print(" [*] Connecting exploits to vulns and performing do_host_status")
     do_host_status(asset_group=asset_group)
 
-    print(" [*] Import complete: hosts: %s added, %s skipped, %s errors - vulns: %s added, %s skipped" % (hoststats['added'],
+    print((" [*] Import complete: hosts: %s added, %s skipped, %s errors - vulns: %s added, %s skipped" % (hoststats['added'],
                                                                                                           hoststats['skipped'],
                                                                                                           hoststats['errored'],
-                                                                                                          vulns_added, vulns_skipped))
+                                                                                                          vulns_added, vulns_skipped)))

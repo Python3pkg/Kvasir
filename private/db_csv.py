@@ -29,9 +29,9 @@ import re
 import gzip
 from optparse import OptionParser
 try:
-    import cStringIO as StringIO
+    import io as StringIO
 except ImportError:
-    import StringIO
+    import io
 
 
 ##--------------------------------------------------------------------

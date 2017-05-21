@@ -9,7 +9,7 @@ __author__ = "Kurt Grutzmacher <grutz@jingojango.net>"
 
 import os, sys, random
 import unittest
-import urllib, urllib2
+import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse
 import logging
 logger = logging.getLogger("web2py.app.kvasir")
 
@@ -22,8 +22,8 @@ except ImportError:
         try:
             import xml.etree.ElementTree as etree
         except ImportError:
-            raise Exception, "Unable to load any XML libraries for etree!"\
-                  "Please install an xml library or Python 2.5 at least"
+            raise Exception("Unable to load any XML libraries for etree!"\
+                  "Please install an xml library or Python 2.5 at least")
 
 ########################################################################
 class NexposeAPIError(RuntimeError):
@@ -40,11 +40,11 @@ class NexposeAPI():
     #----------------------------------------------------------------------
     def __init__(self, host='127.0.0.1', port='3780'):
         self.log = logging.getLogger(self.__class__.__name__)
-        self.opener = urllib2.build_opener()
+        self.opener = urllib.request.build_opener()
         self.host = host
         self.port = port
         self.apiversion = "1.1"
-        self.opener = urllib2.build_opener()
+        self.opener = urllib.request.build_opener()
         self.sessionid = None
         self.syncid = random.randint(1, 65535)
 
@@ -72,7 +72,7 @@ class NexposeAPI():
             return
 
         #post_data = urllib.urlencode(bodytext)
-        req = urllib2.Request(url, data=post_data, headers={"Content-Type": "text/xml"})
+        req = urllib.request.Request(url, data=post_data, headers={"Content-Type": "text/xml"})
         try:
             return self.opener.open(req)
         except:
@@ -99,7 +99,7 @@ class NexposeAPI():
             if self.sessionid:
                 root.set('session-id', self.sessionid)
 
-        for item in attributes.items():
+        for item in list(attributes.items()):
             if item[1] == None:
                 item[1] == ""
             root.set(item[0], item[1])
@@ -107,9 +107,9 @@ class NexposeAPI():
         if len(args) > 0:
             # We have multiple subelements, lets add them now
             for record in args:
-                for element in record.keys():
+                for element in list(record.keys()):
                     child = etree.SubElement(root, element)
-                    for item in record[element].items():
+                    for item in list(record[element].items()):
                         child.set(item[0], item[1])
 
         # don't need to add the standard xml header so we can create multiple xml elements
@@ -117,7 +117,7 @@ class NexposeAPI():
         #return etree.tostring(root, xml_declaration=True, encoding='iso-8859-1')
         try:
             result = etree.tostring(root)
-        except Exception, e:
+        except Exception as e:
             self.log.error("Error creating XML: %s" % (e))
             result = ""
 
@@ -142,7 +142,7 @@ class NexposeAPI():
         self.log.debug("Sending Login request:\n%s" % (loginxml))
         try:
             result = self.send_command(loginxml)
-        except NexposeAPIError, e:
+        except NexposeAPIError as e:
             self.log.error("Error connecting to Nexpose: %s" % (e))
             return False
 
@@ -217,7 +217,7 @@ class Sites(NexposeAPI):
         if not name:
             self.log.warn("No site name set, generating random name")
             import random, string
-            name = "".join([random.choice(string.digits + string.letters) for i in xrange(15)])
+            name = "".join([random.choice(string.digits + string.letters) for i in range(15)])
 
         hostxml=[]
         for host in hosts:
@@ -576,11 +576,11 @@ class VulnData(NexposeAPI):
             self.log.error("No vulnerabilities populated, returning empty")
             return ""
 
-        import csv, StringIO
+        import csv, io
 
-        csvout = StringIO.StringIO()
+        csvout = io.StringIO()
         writer = csv.DictWriter(csvout, fieldnames=('id', 'title', 'severity', 'pciSeverity', 'cvssScore', 'cvssVector', 'published', 'added', 'modified'))
-        for vuln in self.vulnerabilities.keys():
+        for vuln in list(self.vulnerabilities.keys()):
             writer.writerow(self.vulnerabilities[vuln])
 
         return csvout.getvalue()
@@ -974,7 +974,7 @@ if __name__=='__main__':
                 ipshell = IPShellEmbed(argv,banner='*** Starting Interactive Shell - Ctrl-D to exit...\n\nnapi is your NexposeAPI variable to play with\n')
                 ipshell.set_exit_msg('Buh-bye!')
                 ipshell()
-            except ImportError, e:
+            except ImportError as e:
                 sys.exit("IPython not installed, won't continue...")
 
     if options.listvulns:
@@ -982,11 +982,11 @@ if __name__=='__main__':
         vuln_class.populate_summary()
         if (vuln_class.vulnerabilities) > 0:
             if options.listvulns.upper() == "CSV":
-                print vuln_class.csvout()
+                print(vuln_class.csvout())
             else:
-                print vuln_class.vulnxml
+                print(vuln_class.vulnxml)
         else:
-            print "Error: No Vulnerabilities loaded, check your Nexpose server address or user/pass"
+            print("Error: No Vulnerabilities loaded, check your Nexpose server address or user/pass")
 
         sys.exit(0)
 
@@ -995,18 +995,18 @@ if __name__=='__main__':
         sites = Sites(napi.sessionid)
         sites = sites.sitelisting()
         for site in sites:
-            print "Site #%s: %s" % (site, sites[site]['name'])
+            print("Site #%s: %s" % (site, sites[site]['name']))
 
         siteconfig = sites.siteconfig(napi, '2')
 
-        print "\n\nSite configuration for SiteID 2\n"
+        print("\n\nSite configuration for SiteID 2\n")
         for count in siteconfig['ranges']:
             for a in siteconfig['ranges'][count]:
-                print "%s => %s" % (a, siteconfig['ranges'][count][a])
+                print("%s => %s" % (a, siteconfig['ranges'][count][a]))
 
-        print "\nScanconfig for SiteID 2\n"
+        print("\nScanconfig for SiteID 2\n")
         for a in siteconfig['scanconfig']:
-            print "%s => %s" % (a, siteconfig['scanconfig'][a])
+            print("%s => %s" % (a, siteconfig['scanconfig'][a]))
 
         #napi.sitesave("2")
 

@@ -201,7 +201,7 @@ def vuln_update():
 @auth.requires_login()
 def scan_template():
     from lxml import etree
-    from StringIO import StringIO
+    from io import StringIO
 
     response.title = "%s :: Nexpose Scan Templates" % (settings.title)
     formupload = SQLFORM.factory(
@@ -284,9 +284,9 @@ def import_xml_scan():
                 if sites.login(user_id=nexpose_config['user'], password=nexpose_config['password']):
                     sites = sites.listings()
                     nxsitelist.append( [ 0, None ] )
-                    for k,v in sites.iteritems():
+                    for k,v in sites.items():
                         nxsitelist.append( [int(k), sites[k]['name']] )
-            except Exception, e:
+            except Exception as e:
                 pass
 
     if nxsitelist:
@@ -300,7 +300,7 @@ def import_xml_scan():
     if working_msf_api:
         msf_workspaces = []
         msf_workspaces.append( "None" )
-        for w in msf_api.pro_workspaces().keys():
+        for w in list(msf_api.pro_workspaces().keys()):
             msf_workspaces.append(w)
         fields.append(Field('f_msf_workspace', type='string', label=T('MSF Pro Workspace'), requires=IS_EMPTY_OR(IS_IN_SET(msf_workspaces, zero=None))))
 

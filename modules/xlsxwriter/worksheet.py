@@ -15,7 +15,7 @@ from collections import namedtuple
 
 # For compatibility between Python 2 and 3.
 try:
-    from StringIO import StringIO
+    from io import StringIO
 except ImportError:
     from io import StringIO
 
@@ -1501,7 +1501,7 @@ class Worksheet(xmlwriter.XMLwriter):
         }
 
         # Check for valid input parameters.
-        for param_key in options.keys():
+        for param_key in list(options.keys()):
             if not param_key in valid_parameters:
                 warn("Unknown parameter 'param_key' in data_validation()")
                 return -2
@@ -1701,7 +1701,7 @@ class Worksheet(xmlwriter.XMLwriter):
             'bar_color': 1}
 
         # Check for valid input parameters.
-        for param_key in options.keys():
+        for param_key in list(options.keys()):
             if param_key not in valid_parameter:
                 warn("Unknown parameter '%s' in conditional_formatting()" %
                      param_key)
@@ -2052,7 +2052,7 @@ class Worksheet(xmlwriter.XMLwriter):
         }
 
         # Check for valid input parameters.
-        for param_key in options.keys():
+        for param_key in list(options.keys()):
             if not param_key in valid_parameter:
                 warn("Unknown parameter '%s' in add_table()" % param_key)
                 return -3
@@ -2294,7 +2294,7 @@ class Worksheet(xmlwriter.XMLwriter):
         }
 
         # Check for valid input parameters.
-        for param_key in options.keys():
+        for param_key in list(options.keys()):
             if not param_key in valid_parameters:
                 warn("Unknown parameter '%s' in add_sparkline()" % param_key)
                 return -1
@@ -2623,7 +2623,7 @@ class Worksheet(xmlwriter.XMLwriter):
             'select_unlocked_cells': 1}
 
         # Overwrite the defaults with user specified values.
-        for key in (options.keys()):
+        for key in (list(options.keys())):
 
             if key in defaults:
                 defaults[key] = options[key]
@@ -3778,7 +3778,7 @@ class Worksheet(xmlwriter.XMLwriter):
 
         # Overwrite the defaults with any user supplied values. Incorrect or
         # misspelled parameters are silently ignored.
-        for key in options.keys():
+        for key in list(options.keys()):
             params[key] = options[key]
 
         # Encode any string options passed by the user.

@@ -123,7 +123,7 @@
 import os
 import os.path
 import re
-import StringIO
+import io
 import unittest
 
 from glob import glob
@@ -142,11 +142,11 @@ class HostSearch(object):
         ip = host.get_ip()
         ipv6 = host.get_ipv6()
 
-        if mac and mac.has_key('addr'):
+        if mac and 'addr' in mac:
             if name in mac['addr'].lower(): return True
-        if ip and ip.has_key('addr'):
+        if ip and 'addr' in ip:
             if name in ip['addr'].lower(): return True
-        if ipv6 and ipv6.has_key('addr'):
+        if ipv6 and 'addr' in ipv6:
             if name in ipv6['addr'].lower(): return True
 
         if HostSearch.match_hostname(host, name):
@@ -218,7 +218,7 @@ class SearchResult(object):
             self.parsed_scan = scan_result
 
             # Test each given operator against the current parsed result
-            for operator, args in kargs.iteritems():
+            for operator, args in kargs.items():
                 if not self._match_all_args(operator, args):
                     # No match => we discard this scan_result
                     break
@@ -366,7 +366,7 @@ class SearchResult(object):
             return True
 
         # Transform a comma-delimited string containing ports into a list
-        ports = filter(lambda not_empty: not_empty, ports.split(","))
+        ports = [not_empty for not_empty in ports.split(",") if not_empty]
 
         # Check if they're parsable, if not return False silently
         for port in ports:
@@ -401,7 +401,7 @@ class SearchResult(object):
         log.debug("Match port:%s" % ports)
 
         # Transform a comma-delimited string containing ports into a list
-        ports = filter(lambda not_empty: not_empty, ports.split(","))
+        ports = [not_empty for not_empty in ports.split(",") if not_empty]
 
         for host in self.parsed_scan.get_hosts():
             for port in ports:
@@ -487,11 +487,11 @@ class SearchDB(SearchResult, object):
             log.debug(">>> Nmap xml output: %s" % scan.nmap_xml_output)
 
             try:
-                buffer = StringIO.StringIO(scan.nmap_xml_output)
+                buffer = io.StringIO(scan.nmap_xml_output)
                 parsed = NmapParser()
                 parsed.parse(buffer)
                 buffer.close()
-            except Exception, e:
+            except Exception as e:
                 log.warning(">>> Error loading scan with ID %u from database: %s" % (scan.scans_id, str(e)))
             else:
                 self.scan_results.append(parsed)

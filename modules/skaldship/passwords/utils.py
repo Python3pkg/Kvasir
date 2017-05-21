@@ -203,7 +203,7 @@ def insert_or_update_acct(svc_id=None, accounts=None):
     accounts_updated = []
     if db(db.t_services.id == svc_id).count() > 0:
         # we have a valid service, lets add/modify accounts!
-        for username, acct_values in accounts.iteritems():
+        for username, acct_values in accounts.items():
             # run through each account, if it already exists then check
             # to see if f_hash1 has value then don't overwrite it,
             # otherwise update the other fields
@@ -239,7 +239,7 @@ def insert_or_update_acct(svc_id=None, accounts=None):
                         # f_hash1 exists and is the same so update everything else
                         acct_values.pop('f_hash1')
                         acct_values.pop('f_hash1_type')
-                        if acct_values.has_key('f_hash2'):
+                        if 'f_hash2' in acct_values:
                             # check for f_hash2
                             if rec.f_hash2 == acct_values['f_hash2']:
                                 acct_values.pop('f_hash2')
@@ -276,7 +276,7 @@ def process_cracked_file(pw_file=None, file_type=None, message=""):
     if pw_file is not None:
         try:
             fIN = fileinput.input(files=pw_file)
-        except IOError, e:
+        except IOError as e:
             log("Error opening %s: %s" % (pw_file, e), logging.ERROR)
             return "Error opening %s: %s" % (pw_file, e)
     else:
@@ -292,7 +292,7 @@ def process_cracked_file(pw_file=None, file_type=None, message=""):
             try:
                 (username, password, lm, nt) = line.split(':')[0:4]
                 accounts[nt] = password
-            except Exception, e:
+            except Exception as e:
                 log("Error with line (%s): %s" % (line, e), logging.ERROR)
 
     elif file_type == "JTR Shadow":
@@ -306,7 +306,7 @@ def process_cracked_file(pw_file=None, file_type=None, message=""):
                 line = line.strip('\n')
                 (enchash, cleartext) = line.split(':', 1)
                 accounts[enchash] = cleartext
-            except Exception, e:
+            except Exception as e:
                 log("Error with line (%s): %s" % (line, e), logging.ERROR)
 
     elif file_type == "Password:Hash":
@@ -317,14 +317,14 @@ def process_cracked_file(pw_file=None, file_type=None, message=""):
                 line = line.strip('\n')
                 (cleartext, enchash) = line.split(':', 1)
                 accounts[enchash] = cleartext
-            except Exception, e:
+            except Exception as e:
                 log("Error with line (%s): %s" % (line, e), logging.ERROR)
 
     else:
         return "Unknown file type sent"
 
     updated = 0
-    for k, v in accounts.iteritems():
+    for k, v in accounts.items():
         query = (db.t_accounts.f_hash1 == k)|(db.t_accounts.f_hash2 == k)
         for row in db(query).select():
             row.update_record(f_password=v, f_compromised=True, f_message=message)
@@ -355,7 +355,7 @@ def process_password_file(pw_file=None, pw_data=None, file_type=None, source=Non
             pw_data = []
             for line in fileinput.input(files=pw_file):
                 pw_data.append(line)
-        except IOError, e:
+        except IOError as e:
             log("Error opening %s: %s" % (pw_file, e), logging.ERROR)
             return accounts
 
@@ -375,7 +375,7 @@ def process_password_file(pw_file=None, pw_data=None, file_type=None, source=Non
 
                 accounts[username] = dict(f_uid=uid, f_level=level, f_source=source, f_hash1=lm, f_hash1_type='LM',
                                           f_hash2=nt, f_hash2_type='NTLM')
-            except Exception, e:
+            except Exception as e:
                 log("Error with line (%s): %s" % (line, e), logging.ERROR)
 
     elif file_type == "MSCa$h Dump":
@@ -388,7 +388,7 @@ def process_password_file(pw_file=None, pw_data=None, file_type=None, source=Non
             try:
                 (username, pwhash, domain) = line.split(':')
                 accounts[username] = dict(f_hash1=pwhash, f_hash1_type='MSCASH', f_domain=domain, f_source=source)
-            except Exception, e:
+            except Exception as e:
                 log("Error with line (%s): %s" % (line, e), logging.ERROR)
 
     elif file_type == "UNIX Passwd":
@@ -411,7 +411,7 @@ def process_password_file(pw_file=None, pw_data=None, file_type=None, source=Non
                     accounts[username] = dict(f_uid=uid, f_gid=gid, f_level=level, f_fullname=fullname, f_source=source)
 
                 log("Account -> %s" % (accounts[username]), logging.DEBUG)
-            except Exception, e:
+            except Exception as e:
                 log("Error with line (%s): %s" % (line, e), logging.ERROR)
 
     elif file_type == "UNIX Shadow":
@@ -430,7 +430,7 @@ def process_password_file(pw_file=None, pw_data=None, file_type=None, source=Non
                 else:
                     accounts[username] = dict(f_source=source)
 
-            except Exception, e:
+            except Exception as e:
                 log("Error with line (%s): %s" % (line, e), logging.ERROR)
 
     elif file_type == "Username:Password":
@@ -443,7 +443,7 @@ def process_password_file(pw_file=None, pw_data=None, file_type=None, source=Non
                 if source is None:
                     source = "Username:Password"
                 accounts[username] = dict(f_password=password.strip("\n"), f_source=source, f_compromised=True)
-            except Exception, e:
+            except Exception as e:
                 log("Error with line (%s): %s" % (line, e), logging.ERROR)
 
     elif file_type == "Usernames":
@@ -479,7 +479,7 @@ def process_password_file(pw_file=None, pw_data=None, file_type=None, source=Non
                 else:
                     accounts[pw_data['user']] = dict(f_password=pw_data['pass'], f_message=pw_data['msg'],
                                                      f_source=source, f_compromised=True)
-            except Exception, e:
+            except Exception as e:
                 log("Error with line (%s): %s" % (line, e), logging.ERROR)
 
     elif file_type == "Hydra":
@@ -491,7 +491,7 @@ def process_password_file(pw_file=None, pw_data=None, file_type=None, source=Non
             line = line.replace('\n', '')   # remove any and all carriage returns!
             try:
                 pw_data = process_hydra(line)
-                if pw_data.has_key('hash'):
+                if 'hash' in pw_data:
                     # we have an ntlm hash, split that instead of updating the password
                     (lm, nt) = pw_data['hash'].split(':')[0:2]
                     accounts[pw_data['user']] = dict(f_hash1=lm, f_hash1_type='LM', f_hash2=nt, f_hash2_type='NT',
@@ -499,7 +499,7 @@ def process_password_file(pw_file=None, pw_data=None, file_type=None, source=Non
                 else:
                     accounts[pw_data['user']] = dict(f_password=pw_data['pass'], f_message=pw_data['msg'],
                                                      f_source=source, f_compromised=True)
-            except Exception, e:
+            except Exception as e:
                 log("Error with line (%s): %s" % (line, e), logging.ERROR)
 
     elif file_type == "Metasploit Creds CSV":
@@ -524,14 +524,14 @@ def process_password_file(pw_file=None, pw_data=None, file_type=None, source=Non
                     accounts[pw_data['user']] = dict(f_password=pw_data['pass'], f_hash1=pw_data['hash'],
                                                      f_hash1_type=pw_data['type'], f_message=pw_data['msg'],
                                                      f_source=source, f_compromised=compromised)
-            except Exception, e:
+            except Exception as e:
                 log("Error with line (%s): %s" % (line, e), logging.ERROR)
 
     elif file_type == "AccountDB":
         log("Processing AccountDB output file")
         if source is None:
             source = "AccountDB"
-        from StringIO import StringIO
+        from io import StringIO
         import csv
         for line in csv.reader(StringIO(''.join(pw_data))):
             line = line.replace('\n', '')   # remove any and all carriage returns!
@@ -575,7 +575,7 @@ def process_mass_password(pw_file=None, pw_type=None, message=None, proto=None, 
     if pw_file is not None:
         try:
             fIN = fileinput.input(files=pw_file)
-        except IOError, e:
+        except IOError as e:
             log("Error opening %s: %s" % (pw_file, e), logging.ERROR)
             return "Error opening %s: %s" % (pw_file, e)
     else:
@@ -598,7 +598,7 @@ def process_mass_password(pw_file=None, pw_type=None, message=None, proto=None, 
                 mass_pw_data = process_msfcsv(line)
             else:
                 mass_pw_data = dict(error='Invalid password file type provided')
-        except Exception, e:
+        except Exception as e:
             log("Error with line (%s): %s" % (line, e), logging.ERROR)
             continue
 
@@ -634,7 +634,7 @@ def process_mass_password(pw_file=None, pw_type=None, message=None, proto=None, 
 
     # run through the ip_accts now to add/update them to the database
     from skaldship.hosts import get_host_record
-    for k,v in ip_dict.iteritems():
+    for k,v in ip_dict.items():
         for ip_acct in v:
             # build a query to find the service for this host/port combo
             query = (db.t_hosts.f_ipaddr == k) & (db.t_services.f_hosts_id == db.t_hosts.id)

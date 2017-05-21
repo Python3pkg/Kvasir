@@ -32,7 +32,7 @@ def script_metadata():
     """
     try:
         from zenmapCore_Kvasir.ScriptMetadata import get_script_entries
-    except ImportError, e:
+    except ImportError as e:
         return dict(error="Cannot load zenmap python library: %s" % (e))
 
     scr_mdata = get_script_entries(settings.nmap_scriptdir, settings.nmap_nselibdir)
@@ -203,7 +203,7 @@ def process_xml(
                             f_product = f_product,
                             f_version = f_version,
                             )
-                        except Exception, e:
+                        except Exception as e:
                             logger.error("Error inserting OS: %s" % (e))
 
                         db.commit()
@@ -218,7 +218,7 @@ def process_xml(
                                                  f_class = f_class,
                                                  f_hosts_id = host_id,
                                                  f_os_id = os_id)
-                    except Exception, e:
+                    except Exception as e:
                         logger.error("Error inserting OS: %s" % (e))
                     db.commit()
 
@@ -296,14 +296,14 @@ def process_xml(
                         db.t_service_info.update_or_insert(f_services_id=svc_id, f_name=script.get('id'), f_text=sslcert)
                     else:
                         db.t_service_info.update_or_insert(f_services_id=svc_id, f_name=script.get('id'), f_text=script.get('output'))
-                except Exception, e:
+                except Exception as e:
                     logger.error("Error inserting Script: %s" % (e))
                 db.commit()
                 # check for banner id and update t_services banner field with the output
                 if script.get('id') == "banner":
                     try:
                         db.t_services.update_or_insert((db.t_services.id == svc_id), f_banner = script.get('output'))
-                    except Exception, e:
+                    except Exception as e:
                         logger.error("Error inserting Banner: %s" % (e))
                     db.commit()
 
@@ -346,13 +346,13 @@ def process_xml(
             from MetasploitProAPI import MetasploitProAPI
             msf_api = MetasploitProAPI(host=msf_settings.get('url'), apikey=msf_settings.get('key'))
             working_msf_api = msf_api.login()
-        except Exception, error:
+        except Exception as error:
             log(" [!] Unable to authenticate to MSF API: %s" % str(error), logging.ERROR)
             working_msf_api = False
 
         try:
             scan_data = open(filename, "r+").readlines()
-        except Exception, error:
+        except Exception as error:
             log(" [!] Error loading scan data to send to Metasploit: %s" % str(error), logging.ERROR)
             scan_data = None
 

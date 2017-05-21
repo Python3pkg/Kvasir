@@ -110,7 +110,7 @@ class NessusHosts:
             return None, {}, {}
 
         # pull out relevant hostfields
-        for (k,v) in hostdata.iteritems():
+        for (k,v) in hostdata.items():
             if k == 'mac-address':
                 # multiple mac addrs may appear wildly, just pull the first
                 hostfields['f_macaddr'] = v[:v.find('\n')]

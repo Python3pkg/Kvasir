@@ -126,7 +126,7 @@ import os
 import os.path
 import time
 import socket
-import StringIO
+import io
 import copy
 
 from types import StringTypes
@@ -824,7 +824,7 @@ class NmapParserSAX(ParserBasics, ContentHandler):
     def _parse_nmaprun(self, attrs):
         run_tag = "nmaprun"
 
-        if self._nmap_output is None and attrs.has_key("nmap_output"):
+        if self._nmap_output is None and "nmap_output" in attrs:
             self._nmap_output = attrs["nmap_output"]
         self.nmap[run_tag]["profile_name"] = attrs.get("profile_name", "")
         self.nmap[run_tag]["start"] = attrs.get("start", "")
@@ -1142,7 +1142,7 @@ class NmapParserSAX(ParserBasics, ContentHandler):
 
     def get_xml(self):
         """Return a string containing the XML representation of this scan."""
-        buffer = StringIO.StringIO()
+        buffer = io.StringIO()
         self.write_xml(buffer)
         string = buffer.getvalue()
         buffer.close()
@@ -1431,30 +1431,30 @@ if __name__ == '__main__':
     np.parse_file(file_to_parse)
 
     for host in np.hosts:
-        print "%s:" % host.ip["addr"]
-        print "  Comment:", repr(host.comment)
-        print "  TCP sequence:", repr(host.tcpsequence)
-        print "  TCP TS sequence:", repr(host.tcptssequence)
-        print "  IP ID sequence:", repr(host.ipidsequence)
-        print "  Uptime:", repr(host.uptime)
-        print "  OS Match:", repr(host.osmatches)
-        print "  Ports:"
+        print("%s:" % host.ip["addr"])
+        print("  Comment:", repr(host.comment))
+        print("  TCP sequence:", repr(host.tcpsequence))
+        print("  TCP TS sequence:", repr(host.tcptssequence))
+        print("  IP ID sequence:", repr(host.ipidsequence))
+        print("  Uptime:", repr(host.uptime))
+        print("  OS Match:", repr(host.osmatches))
+        print("  Ports:")
         for p in host.ports:
-            print "\t%s" % repr(p)
-        print "  Ports used:", repr(host.ports_used)
-        print "  OS Matches:", repr(host.osmatches)
-        print "  Hostnames:", repr(host.hostnames)
-        print "  IP:", repr(host.ip)
-        print "  IPv6:", repr(host.ipv6)
-        print "  MAC:", repr(host.mac)
-        print "  State:", repr(host.state)
+            print("\t%s" % repr(p))
+        print("  Ports used:", repr(host.ports_used))
+        print("  OS Matches:", repr(host.osmatches))
+        print("  Hostnames:", repr(host.hostnames))
+        print("  IP:", repr(host.ip))
+        print("  IPv6:", repr(host.ipv6))
+        print("  MAC:", repr(host.mac))
+        print("  State:", repr(host.state))
         if "hops" in host.trace:
-            print "  Trace:"
+            print("  Trace:")
             for hop in host.trace["hops"]:
-                print "    ", repr(hop)
-            print
+                print("    ", repr(hop))
+            print()
         if host.hostscripts:
-            print "  Hostscripts:"
+            print("  Hostscripts:")
             for s in host.hostscripts:
-                print "\t%s:" % repr(p.id)
-                print "\t\t".join(repr(p.output))
+                print("\t%s:" % repr(p.id))
+                print("\t\t".join(repr(p.output)))

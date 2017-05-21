@@ -181,9 +181,9 @@ def encode_url_for_xml(url):
 
 def get_url(options={}):
     """Connect to options['url'] and retrieve data"""
-    if options.has_key('url') is None:
+    if ('url' in options) is None:
         return ""
-    if options.has_key('username'):
+    if 'username' in options:
         # add basic auth header
         key = base64.b64encode(options['username']+':'+options.get('password',''))
         headers = {'Authorization': 'Basic ' + key}
@@ -192,12 +192,12 @@ def get_url(options={}):
 
     values = { 'desc': options.get('type', ''),
                'description': options.get('name', '') }
-    data = urllib.urlencode(values)
+    data = urllib.parse.urlencode(values)
 
     try:
-        req = urllib2.Request(options['url'], data, headers)
-        response = urllib2.urlopen(req)
-    except urllib2.URLError, e:
+        req = urllib.request.Request(options['url'], data, headers)
+        response = urllib.request.urlopen(req)
+    except urllib.error.URLError as e:
         raise Exception(e)
 
     return response.read()
@@ -252,7 +252,7 @@ def check_datadir(folder=None):
     datadir = os.path.join(folder, 'data')
     if not os.path.exists(datadir):
         logger.info("Creating data directories in %s..." % datadir)
-        os.mkdir(datadir, 0775)
+        os.mkdir(datadir, 0o775)
 
     for dirname in [
         'passwords', 'passwords/unix', 'passwords/win', 'passwords/other', 'passwords/misc',
@@ -261,7 +261,7 @@ def check_datadir(folder=None):
     ]:
         d = os.path.join(datadir, dirname)
         if not os.path.exists(d):
-            os.mkdir(d, 0755)
+            os.mkdir(d, 0o755)
 
     return True
 
@@ -326,7 +326,7 @@ def oui_lookup(mac_addr='00:00:00:00:00:00', nmap_os_db='/usr/local/share/nmap/n
 
     try:
         oui_fs = open(nmap_os_db, "r")
-    except IOError, err:
+    except IOError as err:
         return {mac_addr: None, 'error': err[1]}
 
     oui_data = mmap.mmap(oui_fs.fileno(), 0, access=mmap.ACCESS_READ)

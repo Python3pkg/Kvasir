@@ -138,7 +138,7 @@ def spreadsheet():
             vlist = vulnlist(hostfilter=hostfilter)
             vuln_count = 1
             vl_stats = {}
-            for k, v in vlist.iteritems():
+            for k, v in vlist.items():
                 col_num = 0
                 for row in v:
                     (status, count, severity, cvss) = row
@@ -164,10 +164,10 @@ def spreadsheet():
             vl_chart_worksheet = workbook.add_worksheet(vl_chart_ws_name)
             vl_chart_worksheet.write('A1', 'Severity', bold)
             vl_chart = workbook.add_chart({'type': 'column'})
-            for k,v in vl_stats.iteritems():
+            for k,v in vl_stats.items():
                 vl_chart_worksheet.write(0, col_num, k, bold)
                 row_num = 1
-                for k2,v2 in v.iteritems():
+                for k2,v2 in v.items():
                     vl_chart_worksheet.write(row_num, 0, k2)
                     vl_chart_worksheet.write(row_num, 1, v2)
                     row_num += 1
@@ -380,7 +380,7 @@ def customer_xml():
                     vuln_xml.set('status', vuln_rec.f_status)
                     vuln_xml.set('id', db.t_vulndata[vuln_rec.f_vulndata_id].f_vulnid)
                     proof = etree.SubElement(vuln_xml, 'proof')
-                    proof.text = etree.CDATA(unicode(MARKMIN(vuln_rec.f_proof).xml(), 'utf-8'))
+                    proof.text = etree.CDATA(str(MARKMIN(vuln_rec.f_proof).xml(), 'utf-8'))
 
                     # search for the nexpose id in vulns_xml
                     if len(vuln_xml.findall('.//vuln[@id="%s"]' % vuln_xml.get('id', None))) < 1:
@@ -393,9 +393,9 @@ def customer_xml():
                         new_vuln_xml.set('cvss_score', str(vulndata.f_cvss_score))
                         new_vuln_xml.set('cvss_metric', cvss_metrics(vulndata))
                         description = etree.SubElement(new_vuln_xml, 'description')
-                        description.text = etree.CDATA(unicode(MARKMIN(vulndata.f_description).xml(), 'utf-8'))
+                        description.text = etree.CDATA(str(MARKMIN(vulndata.f_description).xml(), 'utf-8'))
                         solution = etree.SubElement(new_vuln_xml, 'solution')
-                        solution.text = etree.CDATA(unicode(MARKMIN(vulndata.f_solution).xml(), 'utf-8'))
+                        solution.text = etree.CDATA(str(MARKMIN(vulndata.f_solution).xml(), 'utf-8'))
 
                         # find vulnerability references and add them
                         vuln_refs = db(db.t_vuln_references.f_vulndata_id == vulndata.id).select()
@@ -462,5 +462,5 @@ def customer_xml():
                         elem = etree.SubElement(acct_xml, 'description')
                         elem.text = acct_rec.f_description.decode('utf-8')
 
-    result = etree.tostring(kvasir_results_xml, pretty_print=True, encoding=unicode)
+    result = etree.tostring(kvasir_results_xml, pretty_print=True, encoding=str)
     return result

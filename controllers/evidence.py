@@ -53,7 +53,7 @@ def add():
         return ""
     elif form.errors:
         response.flash = "Error in form submission"
-        return TABLE(*[TR(k, v) for k, v in form.errors.items()])
+        return TABLE(*[TR(k, v) for k, v in list(form.errors.items())])
 
     db.t_evidence.f_hosts_id.default = None
     response.title = "%s :: Add Evidence" % (settings.title)
@@ -71,7 +71,7 @@ def edit():
 @auth.requires_login()
 def delete():
     count = 0
-    if request.vars.has_key('ids'):
+    if 'ids' in request.vars:
         for r in request.vars.ids.split('|'):
             if r is not '':
                 db(db.t_evidence.id == r).delete()

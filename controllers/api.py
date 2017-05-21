@@ -123,7 +123,7 @@ def evidence_del(records=None):
         try:
             del db.t_evidence[rec]
             msg.append((True, 'Record %s deleted' % (rec)))
-        except Exception, e:
+        except Exception as e:
             msg.append((False, 'Error: %s' % (e)))
 
     return msg
@@ -164,7 +164,7 @@ def evidence_add(recid, filename, f_data, f_type, f_other_type=None, f_text=''):
         )
         db.commit()
         return True, recid
-    except Exception, e:
+    except Exception as e:
         db.commit()
         return False, e
 
@@ -208,7 +208,7 @@ def host_add(**fields):
     try:
         record_id = db.t_hosts.validate_and_insert(**fields)
         db.commit()
-    except Exception, e:
+    except Exception as e:
         db.commit()
         return False, e
     return True, record_id
@@ -234,7 +234,7 @@ def host_delete(hostrecs=None, iprecs=None):
         try:
             del db.t_hosts[host]
             hostrecs_deleted.append(host)
-        except Exception, e:
+        except Exception as e:
             errors.append([host, e])
         db.commit()
 
@@ -322,7 +322,7 @@ def host_details(hostrec=None):
     for a in range(1, 11):
         sev_sum_dict[a] = 0
 
-    for k,v in vulns.iteritems():
+    for k,v in vulns.items():
         # take the severity and increment the sev_sum set item
         count = sev_sum_dict.setdefault(v[0], 0)
         count += 1
@@ -330,7 +330,7 @@ def host_details(hostrec=None):
 
     sev_sum_spark = []
     sev_sum = []
-    for k,v in sev_sum_dict.iteritems():
+    for k,v in sev_sum_dict.items():
         sev_sum_spark.append(str(v))
         if v > 0:
             sev_sum.append("%s: %s" % (k, v))
@@ -551,7 +551,7 @@ def service_add(ipaddr=None, proto=None, port=None, fields={}):
 
     try:
         svc_rec = db.t_services.validate_and_insert(**fields)
-    except Exception, e:
+    except Exception as e:
         return False, 'Error inserting service record: %s' % e
 
     return True, svc_rec
@@ -577,7 +577,7 @@ def service_del(svc_rec=None, ipaddr=None, proto=None, port=None):
         count = db(query).delete()
         db.commit()
         return True, '%s record(s) deleted' % count
-    except Exception, e:
+    except Exception as e:
         return False, 'Error: %s' % e
 
 
@@ -721,11 +721,11 @@ def service_vuln_iptable(hostfilter=None):
             port_txt = "%s/%s" % (svc_rec.f_number, svc_rec.f_proto)
             host_rec = get_host_record(svc_rec.f_hosts_id)
             ip_info = ip_dict.setdefault(host_rec.f_ipaddr, [])
-            if row.t_vulndata.f_vulnid not in map(lambda x: x[0], ip_info):
+            if row.t_vulndata.f_vulnid not in [x[0] for x in ip_info]:
                 ip_info.append((row.t_vulndata.f_vulnid, row.t_vulndata.f_severity, row.t_vulndata.f_cvss_score))
             ip_dict[host_rec.f_ipaddr] = ip_info
 
-        for k, v in ip_dict.iteritems():
+        for k, v in ip_dict.items():
             service_dict.setdefault(port_txt, dict())
             service_dict[port_txt][k] = v
 
@@ -797,7 +797,7 @@ Returns: True/False, Error Msg/account_id
             result.append((False, 'No field values sent'))
             continue
 
-        for key in rec.keys():
+        for key in list(rec.keys()):
             if key not in db.t_accounts.fields:
                 result.append((False, '%s not a valid field' % (key)))
                 continue
@@ -805,7 +805,7 @@ Returns: True/False, Error Msg/account_id
         try:
             recid = db.t_accounts.insert(**rec)
             result.append((True, recid))
-        except Exception, e:
+        except Exception as e:
             result.append((False, e))
         db.commit()
 
@@ -853,7 +853,7 @@ Returns: (True/False, Message)
     if len(values) == 0:
         return False, 'No field values sent'
 
-    for key in values.keys():
+    for key in list(values.keys()):
         if key not in db.t_accounts.fields:
             return False, '%s not a valid field' % key
 
@@ -864,7 +864,7 @@ Returns: (True/False, Message)
         db.t_accounts[account_rec] = values
         db.commit()
         return True, 'Account record %s updated' % account_rec
-    except Exception, e:
+    except Exception as e:
         return False, 'Error: %s' % e
 
 
@@ -886,7 +886,7 @@ def accounts_del(account_rec=None):
         try:
             del db.t_accounts[rec]
             result.append((True, "%s record id deleted" % rec))
-        except Exception, e:
+        except Exception as e:
             result.append((False, "%s error: %s" % (rec, e)))
         db.commit()
 
@@ -1036,7 +1036,7 @@ def snmp_rpt_table(hostfilter=None):
         if perm != 'WRITE' and snmp.t_snmp.f_access == 'WRITE':
             perm = 'WRITE'
         results[snmp.t_snmp.f_community] = (snmp.t_snmp.f_community, count+1, perm)
-    return results.values()
+    return list(results.values())
 
 
 ##-------------------------------------------------------------------------
@@ -1094,7 +1094,7 @@ def snmp_del(snmp_rec=None):
         try:
             del db.t_snmp[str(rec)]
             result.append((True, "%s record deleted" % (rec)))
-        except Exception, e:
+        except Exception as e:
             result.append((False, "%s error: %s" % (rec, e)))
         db.commit()
 

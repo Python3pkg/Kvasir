@@ -64,13 +64,13 @@ class JohnPot:
         k = k.strip('\n')
         if self.win_hash_regex.match(k):
             k = self.upper_windows(k)
-        if self.potdata.has_key(k):
+        if k in self.potdata:
             # key as-is
             return self.potdata[k]
-        if self.potdata.has_key(k.upper()):
+        if k.upper() in self.potdata:
             # upper case
             return self.potdata[k.upper()]
-        if self.potdata.has_key(k.lower()):
+        if k.lower() in self.potdata:
             # lower case
             return self.potdata[k.lower()]
         else:

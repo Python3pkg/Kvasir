@@ -129,7 +129,7 @@ def ref_id_represent(f_source, f_text):
                'CWE': lambda x: A("CWE-%s"%x, _target="_blank", _rel="noreferrer,external", _href="http://cwe.mitre.org/data/definitions/%s.html" % x),
              }
 
-    if ulinks.has_key(f_source):
+    if f_source in ulinks:
         return(ulinks[f_source](f_text))
     else:
         return "%s :: %s" % (f_source, f_text)

@@ -63,7 +63,7 @@ except:
     working_msf_api = False
 
 if working_msf_api:
-    for w in msf_api.pro_workspaces().keys():
+    for w in list(msf_api.pro_workspaces().keys()):
         msf_workspaces.append(w)
 
 try:

@@ -31,7 +31,7 @@ def nessus_get_config():
     config['ignored_plugins'] = nessus_config.get('ignored_plugins', [19506, 11219, 34277])
     config['servers'] = {}
     for server in nessus_config.get('servers'):
-        for k,v in server.iteritems():
+        for k,v in server.items():
             config['servers'][k] = {
                 'url': v.get('url', 'http://localhost:8834/'),
                 'user': v.get('user'),

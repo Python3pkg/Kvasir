@@ -109,9 +109,9 @@ def delete():
 
 @auth.requires_login()
 def refs_add():
-    if request.vars.has_key('id'):
+    if 'id' in request.vars:
         host_id = db.t_hosts[request.vars.id] or redirect(URL('default', 'error', vars={'msg': T('Host record not found')}))
-    elif request.vars.has_key('ipaddr'):
+    elif 'ipaddr' in request.vars:
         host_id = db(db.t_hosts.f_ipaddr == request.vars.ipaddr) or redirect(URL('default', 'error', vars={'msg': T('Host record not found')}))
     else:
         host_id = None
@@ -299,7 +299,7 @@ def mass_assign():
             for row in csv.reader(f):
                 host_id = get_host_record(row[0])
                 if not host_id:
-                    print "[%s] - Record not found" % (row[0])
+                    print("[%s] - Record not found" % (row[0]))
                     continue
 
                 cpe = row[1]

@@ -928,7 +928,7 @@ class Workbook(xmlwriter.XMLwriter):
 
         for chart in self.charts:
 
-            for c_range in chart.formula_ids.keys():
+            for c_range in list(chart.formula_ids.keys()):
                 r_id = chart.formula_ids[c_range]
 
                 # Skip if the series has user defined data.

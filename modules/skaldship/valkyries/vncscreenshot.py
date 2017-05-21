@@ -134,10 +134,10 @@ def do_screenshot(services=None):
                 query, f_filename=filename, f_hosts_id=svc_rec.f_hosts_id, f_data=res[1],
                 f_evidence=filename, f_type="Screenshot", f_text="VNC Screenshot - %s:%s" % (ipaddr, port))
             db.commit()
-            print(" [-] VNC screenshot obtained: %s:%s" % (ipaddr, port))
+            print((" [-] VNC screenshot obtained: %s:%s" % (ipaddr, port)))
             good_count += 1
         else:
-            print(" [!] VNC screenshot failed: %s:%s" % (ipaddr, port))
+            print((" [!] VNC screenshot failed: %s:%s" % (ipaddr, port)))
             invalid_count += 1
 
     return [good_count, invalid_count]
@@ -158,24 +158,24 @@ if __name__ == "__main__":
     result = grab_screenshot(host, port, outfile)
     imgresult = result[1]
 
-    print "Result = %s" % result[0]
+    print("Result = %s" % result[0])
 
     try:
         f = file(outfile)
         imgdata = f.read()
         f.close()
-    except Exception, e:
+    except Exception as e:
         sys.exit("Error processing outfile: %s" % (e))
 
     m1 = md5()
     m1.update(imgresult)
-    print "imgresult md5 = %s" % m1.hexdigest()
+    print("imgresult md5 = %s" % m1.hexdigest())
 
     m2 = md5()
     m2.update(imgdata)
-    print "  imgdata md5 = %s" % m2.hexdigest()
+    print("  imgdata md5 = %s" % m2.hexdigest())
 
     if m1.digest() == m2.digest():
-        print "Images matched. Everything worked!"
+        print("Images matched. Everything worked!")
     else:
-        print "Images don't match. Something borked."
+        print("Images don't match. Something borked.")

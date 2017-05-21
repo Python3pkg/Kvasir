@@ -15,7 +15,7 @@ __version__ = "1.0"
 ##--------------------------------------#
 """
 
-from StringIO import StringIO
+from io import StringIO
 
 from gluon import current
 from skaldship.hosts import create_hostfilter_query
@@ -57,7 +57,7 @@ def vulnlist(qstr="%", hostfilter=None):
              (db.t_service_vulns.f_status == rec.t_service_vulns.f_status)))
         vcount = db(q2).count()
         vstats = vulnlist.setdefault(rec.t_vulndata.f_vulnid, list())
-        if rec.t_service_vulns.f_status not in map(lambda a:a[0], vstats):
+        if rec.t_service_vulns.f_status not in [a[0] for a in vstats]:
             ecount = db(db.t_exploit_references.f_vulndata_id==rec.t_vulndata.id).count()
             vstats.append([rec.t_service_vulns.f_status,
                             vcount,

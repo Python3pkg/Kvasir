@@ -35,7 +35,7 @@ def process_hydra(line):
     retval = {}
     try:
         data = line.split()
-    except Exception, e:
+    except Exception as e:
         log("Error processing hydra line: %s -- %s" % (e, line), logging.ERROR)
         return retval
 

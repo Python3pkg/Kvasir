@@ -68,7 +68,7 @@ def accessed_multi():
         else:
             conftype = False
 
-    if request.vars.has_key('ids'):
+    if 'ids' in request.vars:
         for z in request.vars.ids.split('|'):
             if z is not '':
 
@@ -124,7 +124,7 @@ def followup_multi():
         else:
             conftype = False
 
-    if request.vars.has_key('ids'):
+    if 'ids' in request.vars:
         for z in request.vars.ids.split('|'):
             if z is not '':
 
@@ -183,7 +183,7 @@ def confirmation_multi():
         else:
             conftype = False
 
-    if request.vars.has_key('ids'):
+    if 'ids' in request.vars:
         for z in request.vars.ids.split('|'):
             if z is not '':
 
@@ -266,7 +266,7 @@ def detail():
     for a in range(1, 11):
         sev_sum_dict[a] = 0
 
-    for k,v in vulns.iteritems():
+    for k,v in vulns.items():
         # take the severity and increment the sev_sum set item
         if settings.use_cvss:
             if v[1] is not None:
@@ -285,7 +285,7 @@ def detail():
 
     sev_sum_spark = []
     sev_sum = []
-    for k,v in sev_sum_dict.iteritems():
+    for k,v in sev_sum_dict.items():
         sev_sum_spark.append(str(v))
         if v > 0:
             sev_sum.append("%s: %s" % (k, v))
@@ -556,7 +556,7 @@ def filter():
             session.hostfilter['filtertype'] = filtertype
 
             # this block is a little weird to make True booleans
-            if request.vars.has_key('_formname'):
+            if '_formname' in request.vars:
                 if request.vars.get('unconfirmed'):
                     session.hostfilter['unconfirmed'] = True
                 else:
@@ -688,7 +688,7 @@ def mass_os_refs():
 
     fields = ['f_os_id', 'f_certainty', 'f_class', 'f_family']
     host_ids = []
-    if request.vars.has_key('host_ids'):
+    if 'host_ids' in request.vars:
         for z in request.vars.host_ids.split('|'):
             if z is not '':
                 host_ids.append(z)
@@ -718,7 +718,7 @@ def mass_asset_group():
     """Receives a list of host records and assetgroup and assigns them!"""
 
     host_ids = []
-    if request.vars.has_key('host_ids'):
+    if 'host_ids' in request.vars:
         for z in request.vars.host_ids.split('|'):
             if z is not '':
                 host_ids.append(z)
@@ -750,7 +750,7 @@ def mass_vulndata():
     """
 
     host_ids = []
-    if request.vars.has_key('host_ids'):
+    if 'host_ids' in request.vars:
         for z in request.vars.host_ids.split('|'):
             if z is not '':
                 host_ids.append(z)

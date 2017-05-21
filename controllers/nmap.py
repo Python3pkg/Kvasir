@@ -72,7 +72,7 @@ def import_xml_scan():
     if working_msf_api:
         msf_workspaces = []
         msf_workspaces.append( "None" )
-        for w in msf_api.pro_workspaces().keys():
+        for w in list(msf_api.pro_workspaces().keys()):
             msf_workspaces.append(w)
         fields.append(Field('f_msf_workspace', type='string', label=T('MSF Pro Workspace'), requires=IS_EMPTY_OR(IS_IN_SET(msf_workspaces, zero=None))))
 

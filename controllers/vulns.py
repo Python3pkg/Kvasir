@@ -152,7 +152,7 @@ def vulninfo_by_vulnid():
         query = (db.t_hosts.id > 0)
         query = create_hostfilter_query(session.hostfilter, query, 't_services')
         hosts_dict = db(query).select(db.t_hosts.id, cache=(cache.ram, 30)).as_dict()
-        hostlist = map(lambda x: x['id'], hosts_dict.itervalues())
+        hostlist = [x['id'] for x in iter(hosts_dict.values())]
         for svc_vuln in svc_vulns:
             svc = db.t_services[svc_vuln.f_services_id]
             if svc is None:
@@ -262,11 +262,11 @@ def vulndata_list():
     response.title = "%s :: Vulnerabilites" % (settings.title)
     if request.extension == 'json':
         # Datatables Server-side: http://datatables.net/usage/server-side
-        if request.vars.has_key('iDisplayStart'):
+        if 'iDisplayStart' in request.vars:
             start = int(request.vars.iDisplayStart)
         else:
             start = 0
-        if request.vars.has_key('iDisplayLength'):
+        if 'iDisplayLength' in request.vars:
             if request.vars.iDisplayLength == '-1':
                 limit = db(db.t_vulndata).count()
             else:
@@ -274,7 +274,7 @@ def vulndata_list():
         else:
             limit = int(auth.user.f_show_size)
 
-        if request.vars.has_key('sSearch'):
+        if 'sSearch' in request.vars:
             # sSearch global search box
             query = db.t_vulndata.f_vulnid.like("%%%s%%" % request.vars.sSearch) | db.t_vulndata.f_title.like("%%%s%%" % request.vars.sSearch)
         else:
@@ -452,13 +452,13 @@ def vulndata_by_host():
 
 @auth.requires_login()
 def service_vulns_add():
-    if request.vars.has_key('service'):
+    if 'service' in request.vars:
         svc = db.t_services[request.vars.service] or redirect(URL('default', 'error', vars={'msg': T('Service record not found')}))
         svc_id = [svc.id, "%s :: %s/%s" % (host_title_maker(db.t_hosts[svc.f_hosts_id]), svc.f_proto, svc.f_number)]
     else:
         svc_id = None
 
-    if request.vars.has_key('host'):
+    if 'host' in request.vars:
         # grab services for a host
         host_id = db.t_hosts[request.vars.host] or redirect(URL('default', 'error', vars={'msg': T('Host record not found')}))
         services = db(db.t_services.f_hosts_id == host_id.id).select()
@@ -518,11 +518,11 @@ def new_service_vulns():
         query = (db.t_service_vulns.id > 0) & (db.t_service_vulns.f_services_id == db.t_services.id) & (db.t_service_vulns.f_vulndata_id == db.t_vulndata.id)
         query = create_hostfilter_query(session.hostfilter, query, 't_services')
 
-        if request.vars.has_key('iDisplayStart'):
+        if 'iDisplayStart' in request.vars:
             start = int(request.vars.iDisplayStart)
         else:
             start = 0
-        if request.vars.has_key('iDisplayLength'):
+        if 'iDisplayLength' in request.vars:
             if request.vars.iDisplayLength == '-1':
                 limit = db(query).count()
             else:
@@ -530,7 +530,7 @@ def new_service_vulns():
         else:
             limit = int(auth.user.f_show_size)
 
-        if request.vars.has_key('sSearch'):
+        if 'sSearch' in request.vars:
             # sSearch global search box
             query &= db.t_vulndata.f_vulnid.like("%%%s%%" % request.vars.sSearch) | db.t_vulndata.f_title.like("%%%s%%" % request.vars.sSearch)
 
@@ -564,7 +564,7 @@ def service_vulns_delete():
 def service_vuln_exploited():
     uncount = 0
     spacount = 0
-    if request.vars.has_key('ids'):
+    if 'ids' in request.vars:
         for r in request.vars.ids.split("|"):
             if r is not '':
                 rec = db.t_service_vulns[int(r)]
@@ -627,7 +627,7 @@ def vuln_references_add():
             return
         elif form.errors:
             response.flash = "Error in form submission"
-            return TABLE(*[TR(k, v) for k, v in form.errors.items()])
+            return TABLE(*[TR(k, v) for k, v in list(form.errors.items())])
     else:
         form=crud.create(db.t_vuln_references,next='vuln_references_edit/[id]',message='Vulnerability reference added')
         response.title = "%s :: Add Vulnerability->Reference" % (settings.title)

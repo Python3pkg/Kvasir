@@ -32,7 +32,7 @@ def compromise():
     """Toggle compromised true/false"""
     compr_count = 0
     uncompr_count = 0
-    if request.vars.has_key('ids'):
+    if 'ids' in request.vars:
         for z in request.vars.ids.split('|'):
             if z is not '':
                 flag = db.t_accounts[z].f_compromised
@@ -52,7 +52,7 @@ def compromise():
 @auth.requires_login()
 def delete():
     count = 0
-    if request.vars.has_key('ids'):
+    if 'ids' in request.vars:
         for z in request.vars.ids.split('|'):
             if z is not '' or z is not None:
                 db(db.t_accounts.id == z).delete()
@@ -68,7 +68,7 @@ def delete():
 
 @auth.requires_login()
 def add():
-    if request.vars.has_key('id'):
+    if 'id' in request.vars:
         host_id = db.t_hosts[request.vars.id] or redirect(URL('default', 'error', vars={'msg': T('Host record not found')}))
     else:
         host_id = None
@@ -134,11 +134,11 @@ def csv():
     """
     Download account data in CSV format
     """
-    import cStringIO
+    import io
     q = (db.t_accounts.f_services_id==db.t_services.id) & (db.t_services.f_hosts_id==db.t_hosts.id)
-    if request.vars.has_key('type'):
+    if 'type' in request.vars:
         q &= ((db.t_accounts.f_hash1_type == request.vars.type) | (db.t_accounts.f_hash1_type == request.vars.type))
-    if request.vars.has_key('username'):
+    if 'username' in request.vars:
         q &= (db.t_accounts.f_username == request.vars.username)
 
     accts = db(q).select(
@@ -150,7 +150,7 @@ def csv():
         db.t_accounts.f_uid, db.t_accounts.f_gid, db.t_accounts.f_level,
         db.t_accounts.f_source, db.t_accounts.f_message, db.t_accounts.f_description
     )
-    s = cStringIO.StringIO()
+    s = io.StringIO()
     accts.export_to_csv_file(s)
     return s.getvalue()
 
@@ -164,11 +164,11 @@ def list():
         if request.vars.hash_type is not None:
             query &= ((db.t_accounts.f_hash1_type == request.vars.hash_type) | (db.t_accounts.f_hash2_type == request.vars.hash_type))
 
-        if request.vars.has_key('iDisplayStart'):
+        if 'iDisplayStart' in request.vars:
             start = int(request.vars.iDisplayStart)
         else:
             start = 0
-        if request.vars.has_key('iDisplayLength'):
+        if 'iDisplayLength' in request.vars:
             if request.vars.iDisplayLength == '-1':
                 limit = db(query).count()
             else:
@@ -428,7 +428,7 @@ def check_john_pot():
 
     if form.errors:
         response.flash = 'Error in form'
-        return TABLE(*[TR(k, v) for k, v in form.errors.items()])
+        return TABLE(*[TR(k, v) for k, v in list(form.errors.items())])
     elif form.accepts(request.vars, session):
         if form.vars.potfile:
             potfile = os.path.join(request.folder, settings.password_upload_dir, form.vars.potfile)
@@ -443,14 +443,14 @@ def check_john_pot():
             logger.info("Loading %s ..." % (potfile))
             potdata = JohnPot()
             potdata.load(potfile)
-        except Exception, e:
+        except Exception as e:
             response.flash = "Error loading %s: %s" % (potfile, e)
             return dict(form=form)
 
         # Clear out any uncracked LM hashes:
         # db(db.t_accounts.f_password.contains("???????")).update(f_password=None, f_compromised=False)
 
-        query = (db.t_accounts.f_hash1 <> None) & (db.t_accounts.f_password == None)
+        query = (db.t_accounts.f_hash1 != None) & (db.t_accounts.f_password == None)
         query |= (db.t_accounts.f_password.contains('???????'))
         uncracked = db(query).select(cache=(cache.ram, 60))
         update_count = 0
@@ -706,14 +706,14 @@ def import_file():
     # all the services
     svc_set = []
     url=URL('accounts', 'import_file')
-    if request.vars.has_key('service_id'):
+    if 'service_id' in request.vars:
         try:
             record = db.t_services[request.vars.service_id]
             svc_set.append((record.id, "%s :: %s/%s" % (host_title_maker(db.t_hosts[record.f_hosts_id]), record.f_proto, record.f_number)))
             url = URL('accounts', 'import_file', vars={'service_id':request.vars.service_id})
         except:
             pass
-    elif request.vars.has_key('host_id'):
+    elif 'host_id' in request.vars:
         try:
             host_record = get_host_record(request.vars.host_id)
             svc_records = db(db.t_services.f_hosts_id == host_record.id).select(cache=(cache.ram, 30))
@@ -750,7 +750,7 @@ def import_file():
     accounts_updated = []
     if form.errors:
         response.flash = 'Error in form'
-        return TABLE(*[TR(k, v) for k, v in form.errors.items()])
+        return TABLE(*[TR(k, v) for k, v in list(form.errors.items())])
     elif form.accepts(request.vars, session):
         if form.vars.f_filename is not None:
             orig_filename = request.vars.f_filename.filename
@@ -786,7 +786,7 @@ def import_file():
             # add the password file to evidence
             try:
                 pwdata = open(filename, "r").readlines()
-            except Exception, e:
+            except Exception as e:
                 logger.error("Error opening %s: %s" % (filename, e))
 
             db.t_evidence.insert( f_hosts_id = db.t_services[form.vars.f_service].f_hosts_id,
@@ -836,7 +836,7 @@ def update_hashes_by_file():
 
     if form.errors:
         response.flash = 'Error in form'
-        return TABLE(*[TR(k, v) for k, v in form.errors.items()])
+        return TABLE(*[TR(k, v) for k, v in list(form.errors.items())])
     elif form.accepts(request.vars, session):
         filename = os.path.join(request.folder, settings.password_upload_dir, form.vars.f_filename)
         logger.info("Processing password file: %s" % (filename))
@@ -874,7 +874,7 @@ def import_mass_password():
 
     if form.errors:
         response.flash = 'Error in form'
-        return TABLE(*[TR(k, v) for k, v in form.errors.items()])
+        return TABLE(*[TR(k, v) for k, v in list(form.errors.items())])
     elif form.accepts(request.vars, session):
         if request.vars.f_filename is not None:
             orig_filename = request.vars.f_filename.filename
@@ -909,14 +909,14 @@ def paste():
     # all the services
     svc_set = []
     url=URL('accounts', 'paste')
-    if request.vars.has_key('service_id'):
+    if 'service_id' in request.vars:
         try:
             record = db.t_services[request.vars.service_id]
             svc_set.append((record.id, "%s :: %s/%s" % (host_title_maker(db.t_hosts[record.f_hosts_id]), record.f_proto, record.f_number)))
             url = URL('accounts', 'paste', vars={'service_id':request.vars.service_id})
         except:
             pass
-    elif request.vars.has_key('host_id'):
+    elif 'host_id' in request.vars:
         try:
             host_record = get_host_record(request.vars.host_id)
             svc_records = db(db.t_services.f_hosts_id == host_record.id).select(cache=(cache.ram, 30))
@@ -953,7 +953,7 @@ def paste():
     accounts_updated = []
     if form.errors:
         response.flash = 'Error in form'
-        return TABLE(*[TR(k, v) for k, v in form.errors.items()])
+        return TABLE(*[TR(k, v) for k, v in list(form.errors.items())])
     elif form.accepts(request.vars, session):
         from gluon.utils import web2py_uuid
         host_id = db.t_services[form.vars.f_service].f_hosts_id
@@ -976,7 +976,7 @@ def paste():
             # add the password file to evidence
             try:
                 pwdata = open(full_file_path, "r").readlines()
-            except Exception, e:
+            except Exception as e:
                 logger.error("Error opening %s: %s" % (full_file_path, e))
                 resp_text += "Error opening %s: %s\n" % (full_file_path, e)
 

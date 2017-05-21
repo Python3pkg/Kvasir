@@ -28,9 +28,9 @@ def index():
 
 @auth.requires_login()
 def add():
-    if request.vars.has_key('id'):
+    if 'id' in request.vars:
         host_id = db.t_hosts[request.vars.id] or redirect(URL('default', 'error', vars={'msg': T('Host record not found')}))
-    elif request.vars.has_key('ipaddr'):
+    elif 'ipaddr' in request.vars:
         host_id = db(db.t_hosts.f_ipaddr == request.vars.ipaddr) or redirect(URL('default', 'error', vars={'msg': T('Host record not found')}))
     else:
         host_id = None
@@ -193,11 +193,11 @@ def list():
         q = create_hostfilter_query(session.hostfilter, q, 't_services')
 
         # Datatables Server-side: http://datatables.net/usage/server-side
-        if request.vars.has_key('iDisplayStart'):
+        if 'iDisplayStart' in request.vars:
             start = int(request.vars.iDisplayStart)
         else:
             start = 0
-        if request.vars.has_key('iDisplayLength'):
+        if 'iDisplayLength' in request.vars:
             if request.vars.iDisplayLength == '-1':
                 limit = db(q).count()
             else:
@@ -383,7 +383,7 @@ def list():
 @auth.requires_login()
 def delete():
     count = 0
-    if request.vars.has_key('ids'):
+    if 'ids' in request.vars:
         for z in request.vars.ids.split('|'):
             if z is not '':
                 db(db.t_services.id == z).delete()
@@ -553,9 +553,9 @@ def hosts_with_port():
 
 @auth.requires_login()
 def info_add():
-    if request.vars.has_key('id'):
+    if 'id' in request.vars:
         host_id = db.t_hosts[request.vars.id] or redirect(URL('default', 'error', vars={'msg': T('Host record not found')}))
-    elif request.vars.has_key('ipaddr'):
+    elif 'ipaddr' in request.vars:
         host_id = db(db.t_hosts.f_ipaddr == request.vars.ipaddr) or redirect(URL('default', 'error', vars={'msg': T('Host record not found')}))
     else:
         host_id = None

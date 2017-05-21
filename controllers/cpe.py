@@ -30,7 +30,7 @@ def os_add_to_kvasir():
     Adds a CPE OS record to the current Kvasir t_os db
     """
     count = 0
-    if request.vars.has_key('ids'):
+    if 'ids' in request.vars:
         for arg in request.vars.ids.split('|'):
             if arg is not '':
                 cpe_record = db.t_cpe_os[arg]
@@ -73,17 +73,17 @@ def os_edit():
 def os_list():
     response.title = "%s :: CPE Operating Systems" % (settings.title)
     if request.extension == 'json':
-        if request.vars.has_key('iDisplayStart'):
+        if 'iDisplayStart' in request.vars:
             start = int(request.vars.iDisplayStart)
         else:
             start = 0
-        if request.vars.has_key('iDisplayLength'):
+        if 'iDisplayLength' in request.vars:
             limit = start + int(request.vars.iDisplayLength)
             if limit == -1:
                 limit = db(db.t_cpe_os).count()
         else:
             limit = int(auth.user.f_show_size)
-        if request.vars.has_key('sSearch'):
+        if 'sSearch' in request.vars:
             # sSearch global search box
             # only need to do cpename and title since the other fields
             # are just these broken out

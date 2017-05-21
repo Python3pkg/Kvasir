@@ -1,7 +1,6 @@
 _FILEUPLOAD=False
-
-from urllib2 import urlopen, Request, build_opener
-from urllib import urlencode
+from urllib.request import urlopen, Request, build_opener
+from urllib.parse import urlencode
 from xml.dom.minidom import parse as parse_xml
 from .utils import get_text_by_tag, PolicyParameters, NessusPolicy, \
         NessusReport, NessusScan

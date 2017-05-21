@@ -103,7 +103,7 @@ class Format(xmlwriter.XMLwriter):
         self.font_only = 0
 
         # Convert properties in the constructor to method calls.
-        for key, value in properties.items():
+        for key, value in list(properties.items()):
             getattr(self, 'set_' + key)(value)
 
     ###########################################################################

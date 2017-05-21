@@ -27,9 +27,9 @@ def index():
 
 @auth.requires_login()
 def add():
-    if request.vars.has_key('id'):
+    if 'id' in request.vars:
         host_id = db.t_hosts[request.vars.id] or redirect(URL('default', 'error', vars={'msg': T('Host record not found')}))
-    elif request.vars.has_key('ipaddr'):
+    elif 'ipaddr' in request.vars:
         host_id = db(db.t_hosts.f_ipaddr == request.vars.ipaddr) or redirect(URL('default', 'error', vars={'msg': T('Host record not found')}))
     else:
         host_id = None
@@ -50,7 +50,7 @@ def add():
 @auth.requires_login()
 def add_ajax():
     record = None
-    if request.vars.has_key('f_hosts_id'):
+    if 'f_hosts_id' in request.vars:
         record = get_host_record(request.vars.f_hosts_id)
     if record:
         db.t_host_notes.f_hosts_id.default = record.id
@@ -62,7 +62,7 @@ def add_ajax():
         return
     elif form.errors:
         response.flash = "Error in form submission"
-        return TABLE(*[TR(k, v) for k, v in form.errors.items()])
+        return TABLE(*[TR(k, v) for k, v in list(form.errors.items())])
 
     db.t_host_notes.f_hosts_id.default = None
     return dict(form=form)
@@ -78,7 +78,7 @@ def read():
 @auth.requires_login()
 def delete():
     count = 0
-    if request.vars.has_key('note_ids'):
+    if 'note_ids' in request.vars:
         for z in request.vars.note_ids.split('|'):
             if z is not '':
                 db(db.t_host_notes.id == z).delete()

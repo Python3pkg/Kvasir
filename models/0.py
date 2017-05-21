@@ -41,7 +41,7 @@ def autocomplete_bootstrap(f,v):
     inp_id = "autocomplete-input-bs-" + str(uuid.uuid4())[:8]
     rows = f._db(f._table['id']>0).select(f,distinct=True)
     #itms = rows.as_list()
-    itms = [XML(t.values()[0], sanitize=True).xml() for t in rows]
+    itms = [XML(list(t.values())[0], sanitize=True).xml() for t in rows]
     #inp = SQLFORM.widgets.string.widget(f, v, _id=inp_id, **{'_data-provide': 'typeahead', '_data-source': itms, '_data-items': 8})
     inp = SQLFORM.widgets.string.widget(f, v, _id=inp_id, _autocomplete="off", **{"_data-provide":"typeahead"})
     itms_var = "autocomplete_bs_data_" + str(uuid.uuid4())[:8]

@@ -123,7 +123,7 @@
 import re
 
 from types import StringTypes
-from ConfigParser import DuplicateSectionError, NoSectionError, NoOptionError
+from configparser import DuplicateSectionError, NoSectionError, NoOptionError
 
 from zenmapCore.Paths import Path
 from zenmapCore.UmitLogging import log
@@ -363,7 +363,7 @@ class NmapOutputHighlight(object):
         settings = self.sanity_settings(list(settings))
 
         [config_parser.set(property_name, self.setts[pos], settings[pos]) \
-         for pos in xrange(len(settings))]
+         for pos in range(len(settings))]
 
     def sanity_settings(self, settings):
         """This method tries to convert insane settings to sanity ones ;-)
@@ -380,10 +380,10 @@ class NmapOutputHighlight(object):
         settings[2] = self.boolean_sanity(settings[2])
 
         tuple_regex = "[\(\[]\s?(\d+)\s?,\s?(\d+)\s?,\s?(\d+)\s?[\)\]]"
-        if isinstance(settings[3], basestring):
+        if isinstance(settings[3], str):
             settings[3] = [int(t) for t in re.findall(tuple_regex, settings[3])[0]]
 
-        if isinstance(settings[4], basestring):
+        if isinstance(settings[4], str):
             settings[4]= [int(h) for h in re.findall(tuple_regex, settings[4])[0]]
 
         return settings

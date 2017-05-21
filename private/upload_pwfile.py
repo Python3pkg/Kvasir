@@ -35,11 +35,11 @@ def process_pwfiles(options):
     for pw_file_info in options.pw_file_infos:
 
         print("----------------------------------------------------------------")
-        print(" [*] Processing password file: %s" % (pw_file_info['full_path']))
+        print((" [*] Processing password file: %s" % (pw_file_info['full_path'])))
         try:
             pw_data = open(pw_file_info['full_path'], "r").readlines()
-        except Exception, e:
-            print " [!] Unable to load file: %s" % (e)
+        except Exception as e:
+            print(" [!] Unable to load file: %s" % (e))
             return False
 
         acct_api = Accounts(options.aspanguri)
@@ -54,11 +54,11 @@ def process_pwfiles(options):
             )
             for line in res[1].split("\n"):
                 if len(line) > 0:
-                    print(" [-] %s" % (line))
+                    print((" [-] %s" % (line)))
         else:
-            print(" [!] No service record found and none added for %s %s/%s" % (
+            print((" [!] No service record found and none added for %s %s/%s" % (
                 pw_file_info['ipaddr'], options.proto, options.port
-            ))
+            )))
 
 ##--------------------------------------------------------------------
 
@@ -68,7 +68,7 @@ def get_address(options, filename):
         if address is None:
             address = get_ipv6(filename)
             if address is None:
-                print " [!] No IPv4/IPv6 address provided or found in the filename: %s" % (filename)
+                print(" [!] No IPv4/IPv6 address provided or found in the filename: %s" % (filename))
             else:
                 address = ipv6_addr
     else:
@@ -89,7 +89,7 @@ def get_svc_rec(options, address):
         if options.add_to_services:
             retval = svc_api.add(ipaddr=address, proto=options.proto, port=options.port)
             if not retval[0]:
-                print(retval[1])
+                print((retval[1]))
                 return None
             else:
                 return retval[1]
@@ -119,7 +119,7 @@ def Run(options):
     options.pw_file_infos = []
     if options.directory is not None and options.filename is None:
 
-        print " [*] Processing directory: %s" % (options.directory)
+        print(" [*] Processing directory: %s" % (options.directory))
         for file_path, dirs, filenames in os.walk(options.directory):
             for filename in filenames:
                 address = get_address(options, filename)
@@ -186,9 +186,9 @@ if __name__=='__main__':
 
     (options, params) = optparser.parse_args()
 
-    print " ----------------------------------------------------------"
-    print " -- Password file upload, Kvasir master pwner edition --"
-    print " ----------------------------------------------------------\n"
+    print(" ----------------------------------------------------------")
+    print(" -- Password file upload, Kvasir master pwner edition --")
+    print(" ----------------------------------------------------------\n")
 
     if options.f_type is None:
         raise OptionValueError("\n [!] Must provide a password file type\nValid entries are:\n\n%s" % (', '.join(PW_TYPES)))

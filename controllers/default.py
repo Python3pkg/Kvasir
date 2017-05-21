@@ -17,9 +17,9 @@ from skaldship.statistics import db_statistics, adv_db_statistics, graphs_index
 crud.settings.formstyle = formstyle_bootstrap_kvasir
 
 try:
-    import cStringIO as StringIO
+    import io as StringIO
 except ImportError:
-    import StringIO
+    import io
 
 import logging
 logger = logging.getLogger("web2py.app.kvasir")
@@ -142,7 +142,7 @@ def update_dynamic_fields():
         userlist.append( [ user.id, user.username ] )
 
     ag = db(db.t_hosts).select(db.t_hosts.f_asset_group, distinct=True).as_list()
-    asset_groups = map((lambda x: x['f_asset_group']), ag)
+    asset_groups = list(map((lambda x: x['f_asset_group']), ag))
 
     form = SQLFORM.factory(
         Field('f_exploit_link', type='boolean', default=True, label=T('Exploit linking')),
@@ -202,11 +202,11 @@ def database_backup():
         fname= "".join([x if x.isalnum() else "_" for x in fname])
         if form.vars.download:
             # generate csv and download
-            s = StringIO.StringIO()
+            s = io.StringIO()
             db.export_to_csv_file(s)
             response.headers['Content-Type'] = 'text/csv'
             if form.vars.gzip:
-                gz_s = StringIO.StringIO()
+                gz_s = io.StringIO()
                 response.headers['Content-Disposition'] = 'attachment; filename="%s.gz"' % fname
                 gz = gzip.GzipFile(filename='temp.gz', mode='wb', fileobj=gz_s)
                 gz.write(s.getvalue())

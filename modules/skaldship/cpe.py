@@ -17,8 +17,8 @@ __version__ = "1.0"
 
 from gluon import current
 import gluon.contrib.simplejson
-import sys, os, time, re, HTMLParser, string
-from StringIO import StringIO
+import sys, os, time, re, html.parser, string
+from io import StringIO
 import logging
 logger = logging.getLogger("web2py.app.kvasir")
 
@@ -65,7 +65,7 @@ def split_cpe(cpe=None):
                         # if it gets this far then the file is bad
                         try:
                             part, vendor, product = cpe.split(':')
-                        except ValueError, e:
+                        except ValueError as e:
                             logger.error("Uh, I have no idea what CPE data this is. Error: %s\n%s" % (e, cpe))
 
     return {
@@ -224,7 +224,7 @@ def lookup_cpe(cpe_name=None):
                 f_edition = cpe_dict['edition'],
                 f_language = cpe_dict['language']
             )
-        except Exception, e:
+        except Exception as e:
             logger.error("Error inserting OS: %s" % (e))
         db.commit()
 
@@ -256,7 +256,7 @@ def process_xml(filename=None, download=False, wipe=False):
             logger.info("Downloading http://static.nvd.nist.gov/feeds/xml/cpe/dictionary/official-cpe-dictionary_v2.3.xml.gz... Please wait...")
             gz_cpedata = fetch('http://static.nvd.nist.gov/feeds/xml/cpe/dictionary/official-cpe-dictionary_v2.3.xml.gz')
             logger.info("Download complete. %s bytes received" % (sys.getsizeof(gz_cpedata)))
-        except Exception, e:
+        except Exception as e:
             raise Exception("Error downloading CPE XML file: %s" % (e))
 
     logger.info("Processing CPE XML file...")
@@ -267,13 +267,13 @@ def process_xml(filename=None, download=False, wipe=False):
     try:
         if download:
             import gzip
-            from cStringIO import StringIO
+            from io import StringIO
             gz_cpedata = StringIO(gz_cpedata)
             infile = gzip.GzipFile(fileobj=gz_cpedata).read()
             cpe_xml = etree.parse(StringIO(infile))
         else:
             cpe_xml = etree.parse(filename)
-    except etree.ParseError, e:
+    except etree.ParseError as e:
         raise Exception("Error loading CPE XML file: %s " % (e))
 
     root = cpe_xml.getroot()
@@ -369,7 +369,7 @@ def process_xml(filename=None, download=False, wipe=False):
                 )
                 hardware_added += 1
             """
-        except Exception, e:
+        except Exception as e:
             logger.warn("Exception adding CPE data: %s" % (e))
             pass
 

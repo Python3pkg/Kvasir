@@ -17,10 +17,10 @@
 import os
 import sys
 import logging
-import httplib
+import http.client
 try:
     import msgpack
-except ImportError, e:
+except ImportError as e:
     raise Exception("Install 'msgpack' library: 'pip install msgpack-python'")
 logger = logging.getLogger("web2py.app.kvasir")
 
@@ -42,7 +42,7 @@ class MetasploitProAPI:
         self.apikey = apikey
         self.ssl = ssl
         if host.startswith('http'):
-            from urlparse import urlsplit
+            from urllib.parse import urlsplit
             (self.host, self.port) = urlsplit(host)[1].split(':')
         else:
             (self.host, self.port) = host.split(':')
@@ -70,19 +70,19 @@ class MetasploitProAPI:
         headers = {"Content-type" : "binary/message-pack"}
 
         if self.ssl:
-            httpclient = httplib.HTTPSConnection(self.host, self.port)
+            httpclient = http.client.HTTPSConnection(self.host, self.port)
         else:
-            httpclient = httplib.HTTPConnection(self.host, self.port)
+            httpclient = http.client.HTTPConnection(self.host, self.port)
         try:
             httpclient.request("POST", self.apiurl, message, headers)
-        except Exception, e:
+        except Exception as e:
             raise MSFProAPIError("HTTP Client error:", e)
 
         response = httpclient.getresponse()
         if response.status == 200:
             try:
                 res = msgpack.unpackb(response.read())
-            except Exception, e:
+            except Exception as e:
                 raise MSFProAPIError("Unable to process response:", e)
             if res.get('error') is True:
                 raise MSFProAPIError("API Error:", res['error_string'])
@@ -113,7 +113,7 @@ class MetasploitProAPI:
             # checking to be sure API key is valid
             self.log.debug("Obtaining Metasploit version and statistics")
             resp = self.version()
-            if resp.has_key('version'):
+            if 'version' in resp:
                 self.log.info("Server v%s, API %s, Ruby v%s" % (resp['version'], resp['api'], resp['ruby']))
                 self.connected = True
             else:
@@ -568,32 +568,32 @@ def listallmodules(msf):
     from pprint import pprint
 
     payloads = msf.payloads()
-    print "All Paylods:"
+    print("All Paylods:")
     for m in payloads:
         pprint("%s: %s" % (m, payloads[m]))
 
     exploits = msf.module_list("exploits")
     for f in exploits:
-        print "Exploit name: %s" % (f)
+        print("Exploit name: %s" % (f))
         modinfo = msf.module_info("exploits", f)
-        print "Module Info:"
+        print("Module Info:")
         for m in modinfo:
-            print("%s: %s" % (m, modinfo[m]))
+            print(("%s: %s" % (m, modinfo[m])))
         modopts = msf.module_options("exploits", f)
-        print "Module Options:"
+        print("Module Options:")
         for m in modopts:
-            print("%s: %s" % (m, modopts[m]))
+            print(("%s: %s" % (m, modopts[m])))
 
     auxiliary = msf.module_list("auxiliary")
     for f in auxiliary:
-        print "Auxiliary name: %s" % (f)
+        print("Auxiliary name: %s" % (f))
         modinfo = msf.module_info("auxiliary", f)
         for m in modinfo:
-            print("%s: %s" % (m, modinfo[m]))
+            print(("%s: %s" % (m, modinfo[m])))
         modopts = msf.module_options("exploits", f)
-        print "Module Options:"
+        print("Module Options:")
         for m in modopts:
-            print("%s: %s" % (m, modinfo[m]))
+            print(("%s: %s" % (m, modinfo[m])))
 
 #----------------------------------------------------------------------
 
@@ -611,8 +611,8 @@ def login(options):
 
     msf = MetasploitProAPI( options.username, options.password, options.server, options.ssl )
 
-    print "-" * 75
-    print "Metasploit Pro API v%s" % (msf.libraryversion)
+    print("-" * 75)
+    print("Metasploit Pro API v%s" % (msf.libraryversion))
 
     if options.ssl:
         msf.ssl = True
@@ -620,11 +620,11 @@ def login(options):
         msf.ssl = False
 
     if not msf.connect():
-        print "[main] Unable to continue, not connected!"
+        print("[main] Unable to continue, not connected!")
         sys.exit(1)
 
-    print "Connected to Metasploit Pro version %s" % (msf.version())
-    print "-" * 75
+    print("Connected to Metasploit Pro version %s" % (msf.version()))
+    print("-" * 75)
 
     return msf
 

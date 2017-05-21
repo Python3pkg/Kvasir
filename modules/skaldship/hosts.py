@@ -36,7 +36,7 @@ def add_or_update(hostfields, update=False):
         try:
             host_id = db.t_hosts.insert(**hostfields)
             db.commit()
-        except Exception, e:
+        except Exception as e:
             log("Error adding host: %s" % strerror(e))
             return None
 
@@ -117,7 +117,7 @@ def get_or_create_record(argument, **defaults):
     record = get_host_record(argument)
     if not record:
         fields = {}
-        for k in defaults.keys():
+        for k in list(defaults.keys()):
             if k in db.t_hosts.fields:
                 fields[k] = defaults[k]
 
@@ -196,7 +196,7 @@ def create_hostfilter_query(fdata, q=None, dbname=None):
         db_parent_map = {
             't_accounts': 't_services',
             }
-        if dbname in db_parent_map.keys():
+        if dbname in list(db_parent_map.keys()):
             q &= db.t_hosts.id == db[db_parent_map[dbname]].f_hosts_id
         else:
             q &= db.t_hosts.id == db[dbname].f_hosts_id
@@ -352,7 +352,7 @@ def do_host_status(records=[], query=None, asset_group=None, hosts=[]):
 
         # parse through the vuln_sev dictionary and count the severity types
         # then add them to their respective sev_sum_dict entry
-        for k,v in vuln_sev.iteritems():
+        for k,v in vuln_sev.items():
             # take the severity and increment the sev_sum set item
             if settings.use_cvss:
                 severity = int(float(v[1]))
@@ -364,7 +364,7 @@ def do_host_status(records=[], query=None, asset_group=None, hosts=[]):
 
         # make the sparkline data string
         spark_list = []
-        for k,v in sev_sum_dict.iteritems():
+        for k,v in sev_sum_dict.items():
             spark_list.append(str(v))
         vuln_sum_spark = ",".join(spark_list)
 

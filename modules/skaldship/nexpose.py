@@ -18,12 +18,12 @@ __version__ = "1.0"
 from gluon import current
 import time
 import re
-import HTMLParser
+import html.parser
 from datetime import datetime
 try:
-    from cStringIO import StringIO
+    from io import StringIO
 except ImportError:
-    from StringIO import StringIO
+    from io import StringIO
 from skaldship.general import html_to_markmin
 from skaldship.hosts import do_host_status
 from skaldship.exploits import connect_exploits
@@ -62,14 +62,14 @@ def nx_xml_to_html(vulnxml):
     vuln_xslt = etree.XML("".join(open(d, "r").readlines()))
     transform = etree.XSLT(vuln_xslt)
 
-    if isinstance(vulnxml, (str, unicode)):
+    if isinstance(vulnxml, str):
         # convert to stringio for etree parsing
-        from StringIO import StringIO
+        from io import StringIO
         vulnxml = StringIO(vulnxml)
 
     vulnxml = etree.parse(vulnxml)
     result = transform(vulnxml)
-    vulnhtml = etree.tostring(result, xml_declaration=False, encoding=unicode)
+    vulnhtml = etree.tostring(result, xml_declaration=False, encoding=str)
 
     return clean_html(vulnhtml)
 
@@ -115,7 +115,7 @@ then a new one is added."""
     result['f_language'] = None
     result['f_title'] = None
 
-    if os_rec.attrib.has_key('title'):
+    if 'title' in os_rec.attrib:
         result['f_title'] = os_rec.attrib['title']
     else:
         # must build a title since one doesn't exist
@@ -134,7 +134,7 @@ then a new one is added."""
         if os_rec.attrib.has_key('f_language'):
             title_data.append(os_key.attrib['f_language'])
         """
-        os_keys = os_rec.keys()
+        os_keys = list(os_rec.keys())
         try:
             os_keys.remove('certainty')
         except:
@@ -156,8 +156,8 @@ then a new one is added."""
                 out.append(word)
         result['f_title'] = " ".join(out)
 
-    if os_rec.attrib.has_key('vendor'): result['f_vendor'] =os_rec.attrib['vendor'].lower()
-    if os_rec.attrib.has_key('product'):
+    if 'vendor' in os_rec.attrib: result['f_vendor'] =os_rec.attrib['vendor'].lower()
+    if 'product' in os_rec.attrib:
         result['f_product'] = os_rec.attrib['product'].lower()
 
         # this is annoying logic to handle cpe's variations of the product name
@@ -170,8 +170,8 @@ then a new one is added."""
             result['f_product'] = result['f_product'].replace(" ", "-")
         else:
             result['f_product'] = result['f_product'].replace(" ", "_")
-    if os_rec.attrib.has_key('arch'): result['f_edition'] = os_rec.attrib['arch'].lower()
-    if os_rec.attrib.has_key('version'):
+    if 'arch' in os_rec.attrib: result['f_edition'] = os_rec.attrib['arch'].lower()
+    if 'version' in os_rec.attrib:
         result['f_update'] =os_rec.attrib['version'].lower()
         if result['f_vendor'] == "microsoft":
             try:
@@ -286,13 +286,13 @@ def vuln_parse(vuln, fromapi=False):
         'f_pci_sev': vuln.attrib['pciSeverity']
     }
 
-    if 'published' in vuln.keys():
+    if 'published' in list(vuln.keys()):
         vulnfields['f_dt_published'] = vuln_time_convert(vuln.attrib['published'])
 
     vulnfields['f_dt_added'] = vuln_time_convert(vuln.attrib['added'])
     vulnfields['f_dt_modified'] = vuln_time_convert(vuln.attrib['modified'])
 
-    if 'cvssScore' in vuln.keys():
+    if 'cvssScore' in list(vuln.keys()):
         vulnfields['f_cvss_score'] = vuln.attrib['cvssScore']
 
         cvss_vectors = vuln.attrib['cvssVector'] # cvssVector="(AV:N/AC:M/Au:N/C:P/I:P/A:P)"
@@ -362,13 +362,13 @@ def import_all_vulndata(overwrite=False, nexpose_server={}):
         log(" [*] Populating list of Nexpose vulnerability ID summaries")
         try:
             vuln_class.populate_summary()
-        except Exception, e:
+        except Exception as e:
             log(" [!] Error populating summaries: %s" % str(e), logging.ERROR)
             return False
 
         try:
             vulnxml = etree.parse(StringIO(vuln_class.vulnxml))
-        except Exception, e:
+        except Exception as e:
             log(" [!] Error parsing summary XML: %s" % str(e), logging.ERROR)
             return False
 
@@ -392,7 +392,7 @@ def import_all_vulndata(overwrite=False, nexpose_server={}):
 
                 try:
                     vulndetails = vuln_class.detail(vuln.attrib['id'])
-                except Exception, e:
+                except Exception as e:
                     log(" [!] Error retrieving details for %s: %s" % (vuln.attrib['id'], str(e)), logging.ERROR)
                     stats['errors'] += 1
                     if stats['errors'] == 50:
@@ -457,19 +457,19 @@ def process_exploits(filename=None):
 
     try:
         exploits = etree.parse(filename)
-    except etree.ParseError, e:
+    except etree.ParseError as e:
         raise Exception("Error processing file: %s" % e)
-    except IOError, e:
+    except IOError as e:
         raise Exception("Error opening file: %s" % e)
 
     r = exploits.getroot()
     counter = 0
-    from exploits import add_exploit, connect_exploits
+    from .exploits import add_exploit, connect_exploits
     for exploit in r.findall('exploit'):
         #"adobe-unspec-bof-cve-2010-1297","13787","0day Exploit for Adobe Flash and Reader PoC (from the wild)","Description","1","Expert"
         f_name = exploit.findtext('name')
         f_title = exploit.findtext('id')
-        f_description = unicode(exploit.findtext('description')).encode('iso-8859-1').decode('cp1252')
+        f_description = str(exploit.findtext('description')).encode('iso-8859-1').decode('cp1252')
         f_description = f_description.replace("\\'", "'").replace('\\x', "0x")
         f_source = exploit.findtext('source')
         f_level = exploit.findtext('rank') or 'Unknown'         # exploiter experience level estimate
@@ -521,7 +521,7 @@ def process_xml(
     db = current.globalenv['db']
     session = current.globalenv['session']
 
-    parser = HTMLParser.HTMLParser()
+    parser = html.parser.HTMLParser()
     user_id = db.auth_user(engineer)
 
     # build the hosts only/exclude list
@@ -538,7 +538,7 @@ def process_xml(
 
     try:
         nexpose_xml = etree.parse(filename)
-    except etree.ParseError, e:
+    except etree.ParseError as e:
         msg = " [!] Invalid Nexpose XML file (%s): %s " % (filename, e)
         log(msg, logging.ERROR)
         return msg
@@ -557,7 +557,7 @@ def process_xml(
 
         # nexpose identifiers are always lower case in kvasir. UPPER CASE IS FOR SHOUTING!!!
         vulnid = vuln.attrib['id'].lower()
-        if existing_vulnids.has_key(vulnid):
+        if vulnid in existing_vulnids:
             #log(" [-] Skipping %s - It's in the db already" % vulnid)
             vulns_skipped += 1
         else:
@@ -569,7 +569,7 @@ def process_xml(
                     vulnid = db(db.t_vulndata.f_vulnid == vulnfields['f_vulnid']).select().first().id
                 vulns_added += 1
                 db.commit()
-            except Exception, e:
+            except Exception as e:
                 log(" [!] Error inserting %s to vulndata: %s" % (vulnfields['f_vulnid'], e), logging.ERROR)
                 vulnid = None
                 db.commit()
@@ -706,7 +706,7 @@ def process_xml(
                     infotext = nx_xml_to_html(StringIO(etree.tostring(test, xml_declaration=False)))
                     try:
                         unames = re.search("Found user\(s\): (?P<unames>.+?) </li>", infotext).group('unames')
-                    except AttributeError, e:
+                    except AttributeError as e:
                         # regex not found
                         continue
                     for uname in unames.split():
@@ -717,7 +717,7 @@ def process_xml(
                         db.t_accounts.update_or_insert(**d)
                         db.commit()
 
-                test_str = etree.tostring(test, xml_declaration=False, encoding=unicode)
+                test_str = etree.tostring(test, xml_declaration=False, encoding=str)
                 test_str = test_str.encode('ascii', 'xmlcharrefreplace')
                 proof = nx_xml_to_html(StringIO(test_str))
                 proof = html_to_markmin(proof)
@@ -752,7 +752,7 @@ def process_xml(
                         db.commit()
                     except AttributeError:
                         db.commit()
-                    except Exception, e:
+                    except Exception as e:
                         log("Error inserting account (%s): %s" % (uid, e), logging.ERROR)
                     db.commit()
 
@@ -830,7 +830,7 @@ def process_xml(
                             log(" [!] Unknown vulnid, Skipping! (id: %s)" % vulnid, logging.ERROR)
                             continue
 
-                        test_str = etree.tostring(test, xml_declaration=False, encoding=unicode)
+                        test_str = etree.tostring(test, xml_declaration=False, encoding=str)
                         test_str = test_str.encode('ascii', 'xmlcharrefreplace')
                         proof = nx_xml_to_html(StringIO(test_str))
                         proof = html_to_markmin(proof)
@@ -894,7 +894,7 @@ def process_xml(
                                 db.commit()
                             except AttributeError:
                                 db.commit()
-                            except Exception, e:
+                            except Exception as e:
                                 log("Error inserting account (%s): %s" % (uid, e), logging.ERROR)
                             db.commit()
 
@@ -955,7 +955,7 @@ def process_xml(
             <os  certainty="0.66" device-class="General" vendor="Microsoft" family="Windows" product="Windows XP" arch="x86" cpe="cpe:/o:microsoft:windows_xp::sp3"/>
             """
 
-            if os_rec.attrib.has_key('cpe'):
+            if 'cpe' in os_rec.attrib:
                 # we have a cpe entry from xml! hooray!
                 cpe_name = os_rec.attrib['cpe'].replace('cpe:/o:', '')
                 os_id = lookup_cpe(cpe_name)
@@ -983,13 +983,13 @@ def process_xml(
             from MetasploitProAPI import MetasploitProAPI
             msf_api = MetasploitProAPI(host=msf_settings.get('url'), apikey=msf_settings.get('key'))
             working_msf_api = msf_api.login()
-        except Exception, error:
+        except Exception as error:
             log(" [!] Unable to authenticate to MSF API: %s" % str(error), logging.ERROR)
             working_msf_api = False
 
         try:
             scan_data = open(filename, "r+").readlines()
-        except Exception, error:
+        except Exception as error:
             log(" [!] Error loading scan data to send to Metasploit: %s" % str(error), logging.ERROR)
             scan_data = None
 

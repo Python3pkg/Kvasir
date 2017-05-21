@@ -86,11 +86,11 @@ def launch_terminal(record=None, launch_cmd=None):
 
     try:
         logger.info("Spawning: %s\n" % (launch_cmd))
-        print("Spawning: %s" % (launch_cmd))
+        print(("Spawning: %s" % (launch_cmd)))
         subprocess.Popen(launch_cmd, shell=True)#, stdout=None, stdin=None, stderr=None)
-    except Exception, e:
+    except Exception as e:
         logger.error("Error spawning launch cmd (%s): %s\n" % (launch_cmd, e))
-        print("Error spawning launch cmd (%s): %s\n" % (launch_cmd, e))
+        print(("Error spawning launch cmd (%s): %s\n" % (launch_cmd, e)))
 
     return False
 
@@ -273,7 +273,7 @@ def accounts_import_file(filename=None, service=['info', '0'], f_type=None, f_so
     Processes an Imported password file to the accounts table
     """
 
-    print("Processing password file: %s" % (filename))
+    print(("Processing password file: %s" % (filename)))
     from skaldship.passwords.utils import process_password_file, insert_or_update_acct
 
     account_data = process_password_file(pw_file=filename, file_type=f_type, source=f_source)

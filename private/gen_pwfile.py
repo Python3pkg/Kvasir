@@ -178,6 +178,6 @@ for row in db(query).select():
                          acct.f_hash1_type, acct.f_hash1, acct.f_hash2_type, acct.f_hash2])
 
 if type(output) == str:
-    print output
+    print(output)
 
 

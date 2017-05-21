@@ -295,7 +295,7 @@ def vulncloud():
                 )
 
         cloud = []
-        for k, v in vulncloud.iteritems():
+        for k, v in vulncloud.items():
             cloud.append({'tag': k, 'count': v['count'], 'color': v['color']})
         return dict(vulncloud=cloud)
 
@@ -415,7 +415,7 @@ def vulncircles_data():
             })
 
     data = {}
-    for (k,v) in vulncircles.iteritems():
+    for (k,v) in vulncircles.items():
         sev = v['severity']
         values = data.setdefault(sev, [])
         values.append({
@@ -425,7 +425,7 @@ def vulncircles_data():
         data[sev] = values
 
     d3json = []
-    for k in data.keys():
+    for k in list(data.keys()):
         parent = {'name': 'Sev ' + str(k), 'children': data[k]}
         d3json.append(parent)
 
